@@ -1,0 +1,36 @@
+---
+import CellDetails from '../components/CellDetails.vue';
+import Grid from '../components/grid';
+import { createInitialGrid } from '../util/functions/generateInitialGrid';
+
+const cells = createInitialGrid(50, 25);
+---
+
+<div class="grid-container">
+  <CellDetails client:load />
+  <div class="grid-wrapper">
+    <Grid client:load cells={cells} />
+  </div>
+</div>
+
+<style>
+  html, body {
+    height: 100%;
+    margin: 0;
+    padding-left: 5px;
+    padding-top: 5px;
+  }
+
+  .grid-container {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;  
+  }
+
+  .grid-wrapper {
+    flex-grow: 1;  
+    overflow: auto;  
+    max-width: 100%; 
+  }
+
+</style>
