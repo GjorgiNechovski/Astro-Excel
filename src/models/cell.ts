@@ -14,7 +14,8 @@ export interface ICellStyle {
 
 export class Cell {
   constructor(
-    public data: any,
+    public realValue: any,
+    public displayValue: any,
     public row: number,
     public col: number,
     public disabled: boolean,

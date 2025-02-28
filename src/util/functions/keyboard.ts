@@ -35,6 +35,7 @@ export const handleKeyDown = (
     }
 
     setSelectedCells([{ row: newRow, col: newCol }]);
+    state.setSelectedCell({ row: newRow, col: newCol });
 
     return { row: newRow, col: newCol };
   }

@@ -7,18 +7,18 @@ export const createInitialGrid = (rows: number, cols: number) => {
 
   for (let i = 0; i < rows; i++) {
     for (let j = 0; j < cols; j++) {
-      const newCell = new Cell("", i, j, false);
+      const newCell = new Cell("", "", i, j, false);
 
       if (i === 0 || j === 0) {
         newCell.disabled = true;
       }
 
       if (i === 0 && j > 0) {
-        newCell.data = alphabet[j - 1] || "";
+        newCell.realValue = alphabet[j - 1] || "";
       }
 
       if (j === 0 && i > 0) {
-        newCell.data = i.toString();
+        newCell.realValue = i.toString();
       }
 
       const cellStyle: ICellStyle = {

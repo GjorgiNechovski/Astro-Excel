@@ -10,7 +10,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, onMounted, onUnmounted, ref } from "vue";
+import { defineComponent, onMounted, onUnmounted, ref, watch } from "vue";
 import { state } from "../state/stateManager";
 
 export default defineComponent({
@@ -33,6 +33,18 @@ export default defineComponent({
       }
     };
 
+    watch(highlightedCellValue, (newValue) => {
+      if (highlightedCell.value) {
+        const { row, col } = highlightedCell.value;
+        const updatedGrid = state.grid.map((cell) =>
+          cell.row === row && cell.col === col
+            ? { ...cell, data: newValue }
+            : cell
+        );
+        state.setGrid(updatedGrid);
+      }
+    });
+
     onMounted(() => {
       state.subscribe(updateHighlightedCell);
       updateHighlightedCell();
@@ -46,15 +58,7 @@ export default defineComponent({
 
     const handleInputChange = (event: Event) => {
       const newValue = (event.target as HTMLInputElement).value;
-      if (highlightedCell.value) {
-        const { row, col } = highlightedCell.value;
-        const updatedGrid = state.grid.map((cell) =>
-          cell.row === row && cell.col === col
-            ? { ...cell, data: newValue }
-            : cell
-        );
-        state.setGrid(updatedGrid);
-      }
+      highlightedCellValue.value = newValue;
     };
 
     return {
