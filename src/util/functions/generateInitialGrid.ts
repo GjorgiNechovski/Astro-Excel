@@ -15,10 +15,12 @@ export const createInitialGrid = (rows: number, cols: number) => {
 
       if (i === 0 && j > 0) {
         newCell.realValue = alphabet[j - 1] || "";
+        newCell.displayValue = alphabet[j - 1] || "";
       }
 
       if (j === 0 && i > 0) {
         newCell.realValue = i.toString();
+        newCell.displayValue = i.toString();
       }
 
       const cellStyle: ICellStyle = {

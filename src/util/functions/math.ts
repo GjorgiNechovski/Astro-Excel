@@ -76,5 +76,5 @@ export const evaluateFormula = (
     return max !== -Infinity ? max : 0;
   }
 
-  return "Error: Unsupported formula";
+  return formula;
 };

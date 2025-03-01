@@ -26,7 +26,7 @@ export default defineComponent({
           (cell) => cell.row === row && cell.col === col
         );
         highlightedCell.value = state.selectedCell;
-        highlightedCellValue.value = cell ? cell.data : "";
+        highlightedCellValue.value = cell ? cell.displayValue : "";
       } else {
         highlightedCell.value = null;
         highlightedCellValue.value = "";
@@ -36,11 +36,20 @@ export default defineComponent({
     watch(highlightedCellValue, (newValue) => {
       if (highlightedCell.value) {
         const { row, col } = highlightedCell.value;
-        const updatedGrid = state.grid.map((cell) =>
-          cell.row === row && cell.col === col
-            ? { ...cell, data: newValue }
-            : cell
-        );
+        const updatedGrid = state.grid.map((cell) => {
+          if (cell.row === row && cell.col === col) {
+            if (newValue.startsWith("=")) {
+              return {
+                ...cell,
+                displayValue: newValue,
+                realValue: newValue,
+              };
+            } else {
+              return { ...cell, displayValue: newValue, realValue: newValue };
+            }
+          }
+          return cell;
+        });
         state.setGrid(updatedGrid);
       }
     });

@@ -26,12 +26,14 @@ export default function Grid({ cells: initialCells }: GridProps) {
 
   useEffect(() => {
     const updateGrid = () => {
+      console.log("Global state updated, updating local state...");
       if (JSON.stringify(state.grid) !== JSON.stringify(grid)) {
         setGrid([...state.grid]);
         const rows = Math.max(...state.grid.map((cell) => cell.row)) + 1;
         setNumRows(rows);
       }
     };
+
     state.subscribe(updateGrid);
 
     if (state.grid.length === 0) {
@@ -45,18 +47,45 @@ export default function Grid({ cells: initialCells }: GridProps) {
     };
   }, [initialCells, grid]);
 
+  useEffect(() => {
+    const updatedGrid = grid.map((cell) => {
+      if (cell.displayValue.endsWith("=")) {
+        const formula = cell.displayValue.slice(0, -1);
+        const result = evaluateFormula(formula, grid);
+        return { ...cell, realValue: result };
+      }
+      return cell;
+    });
+
+    if (JSON.stringify(updatedGrid) !== JSON.stringify(grid)) {
+      setGrid(updatedGrid);
+      state.setGrid(updatedGrid);
+    }
+  }, [grid]);
+
   const handleInputChange = (row: number, col: number, value: string) => {
     let updatedGrid;
 
-    if (value.startsWith("=")) {
-      const formula = value.slice(1);
-      const result = evaluateFormula(formula, grid);
+    if (value.endsWith("=")) {
+      const formula = value.slice(0, -1);
       updatedGrid = grid.map((cell) =>
-        cell.row === row && cell.col === col ? { ...cell, data: result } : cell
+        cell.row === row && cell.col === col
+          ? {
+              ...cell,
+              displayValue: `${formula}=`,
+              realValue: value,
+            }
+          : cell
       );
     } else {
       updatedGrid = grid.map((cell) =>
-        cell.row === row && cell.col === col ? { ...cell, data: value } : cell
+        cell.row === row && cell.col === col
+          ? {
+              ...cell,
+              displayValue: value,
+              realValue: value,
+            }
+          : cell
       );
     }
 
@@ -91,7 +120,7 @@ export default function Grid({ cells: initialCells }: GridProps) {
             return (
               <input
                 key={index}
-                value={cell.data}
+                value={cell.realValue}
                 style={{
                   width: cell.styles?.width || "100px",
                   height: cell.styles?.height || "30px",
@@ -153,9 +182,5 @@ export default function Grid({ cells: initialCells }: GridProps) {
     return rowsArray;
   };
 
-  return (
-    <div onMouseUp={() => setIsSelecting(false)}>
-      {numRows > 0 ? getRows() : <p>Loading grid...</p>}
-    </div>
-  );
+  return <div onMouseUp={() => setIsSelecting(false)}>{getRows()}</div>;
 }
