@@ -35,7 +35,7 @@ export const handleKeyDown = (
     }
 
     setSelectedCells([{ row: newRow, col: newCol }]);
-    state.setSelectedCell({ row: newRow, col: newCol });
+    state.setSelectedCells([{ row: newRow, col: newCol }]);
 
     return { row: newRow, col: newCol };
   }
@@ -53,7 +53,7 @@ export const handleMouseDown = (
 ) => {
   setIsSelecting(true);
   setSelectedCells([{ row, col }]);
-  state.setSelectedCell({ row, col });
+  state.setSelectedCells([{ row, col }]);
 };
 
 export const handleMouseEnter = (
@@ -82,5 +82,6 @@ export const handleMouseEnter = (
     }
 
     setSelectedCells(newSelectedCells);
+    state.setSelectedCells(newSelectedCells);
   }
 };

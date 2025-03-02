@@ -23,4 +23,10 @@ export class Cell {
   ) {}
 }
 
-type TextAlign = "left" | "center" | "right" | "justify" | "start" | "end";
+export type TextAlign =
+  | "left"
+  | "center"
+  | "right"
+  | "justify"
+  | "start"
+  | "end";

@@ -11,7 +11,7 @@
 
 <script lang="ts">
 import { defineComponent, onMounted, onUnmounted, ref, watch } from "vue";
-import { state } from "../state/stateManager";
+import { state } from "../../state/stateManager";
 
 export default defineComponent({
   name: "CellDetails",
@@ -20,12 +20,12 @@ export default defineComponent({
     const highlightedCellValue = ref<string>("");
 
     const updateHighlightedCell = () => {
-      if (state.selectedCell) {
-        const { row, col } = state.selectedCell;
+      if (state.selectedCells.length > 0) {
+        const { row, col } = state.selectedCells[0];
         const cell = state.grid.find(
           (cell) => cell.row === row && cell.col === col
         );
-        highlightedCell.value = state.selectedCell;
+        highlightedCell.value = { row, col };
         highlightedCellValue.value = cell ? cell.displayValue : "";
       } else {
         highlightedCell.value = null;

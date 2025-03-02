@@ -3,14 +3,14 @@ import type { Cell } from "../models/cell";
 type SelectedCell = {
   row: number;
   col: number;
-} | null;
+};
 
 type Listener = () => void;
 
 export const state = {
   grid: [] as Cell[],
   numRows: 0,
-  selectedCell: null as SelectedCell,
+  selectedCells: [] as SelectedCell[],
   listeners: [] as Listener[],
 
   setGrid(newGrid: Cell[]) {
@@ -23,8 +23,8 @@ export const state = {
     this.notifyListeners();
   },
 
-  setSelectedCell(newSelectedCell: SelectedCell) {
-    this.selectedCell = newSelectedCell;
+  setSelectedCells(newSelectedCells: SelectedCell[]) {
+    this.selectedCells = newSelectedCells;
     this.notifyListeners();
   },
 

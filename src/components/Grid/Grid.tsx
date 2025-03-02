@@ -3,10 +3,10 @@ import {
   handleKeyDown,
   handleMouseDown,
   handleMouseEnter,
-} from "../util/functions/keyboard";
-import type { Cell } from "../models/cell";
-import { state } from "../state/stateManager";
-import { evaluateFormula } from "../util/functions/math";
+} from "../../util/functions/keyboard";
+import type { Cell } from "../../models/cell";
+import { state } from "../../state/stateManager";
+import { evaluateFormula } from "../../util/functions/math";
 
 interface GridProps {
   cells: Cell[];
@@ -26,7 +26,6 @@ export default function Grid({ cells: initialCells }: GridProps) {
 
   useEffect(() => {
     const updateGrid = () => {
-      console.log("Global state updated, updating local state...");
       if (JSON.stringify(state.grid) !== JSON.stringify(grid)) {
         setGrid([...state.grid]);
         const rows = Math.max(...state.grid.map((cell) => cell.row)) + 1;
@@ -91,7 +90,7 @@ export default function Grid({ cells: initialCells }: GridProps) {
 
     setGrid(updatedGrid);
     state.setGrid(updatedGrid);
-    state.setSelectedCell({ row, col });
+    state.setSelectedCells([{ row, col }]);
   };
 
   const isCellSelected = (row: number, col: number) => {
@@ -130,6 +129,7 @@ export default function Grid({ cells: initialCells }: GridProps) {
                   backgroundColor: isCellSelected(cell.row, cell.col)
                     ? "lightblue"
                     : cell.styles?.backgroundColor || "white",
+                  color: cell.styles?.color || "black",
                 }}
                 disabled={cell.disabled}
                 onChange={(e) =>
