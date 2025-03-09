@@ -9,6 +9,9 @@ export interface ICellStyle {
   alignItems?: string;
   fontSize?: string;
   fontWeight?: string;
+  fontFamily?: string;
+  fontStyle?: string;
+  textDecoration?: string;
   color?: string;
 }
 

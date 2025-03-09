@@ -4,6 +4,7 @@ import CellDetails from '../components/Grid/CellDetails.vue';
 import Grid from '../components/Grid/Grid';
 import { createInitialGrid } from '../util/functions/generateInitialGrid';
 import ColorPicker from '../components/WorkMenu/ColorPicker';
+import FontSettings from '../components/WorkMenu/FontSettings';
 
 const cells = createInitialGrid(50, 25);
 ---
@@ -12,6 +13,7 @@ const cells = createInitialGrid(50, 25);
   <div class="controls-row">
     <ColorPicker client:load />
     <AlignmentButtons client:load />
+    <FontSettings client:load />
   </div>
   <CellDetails client:load />
   <div class="grid-wrapper">
