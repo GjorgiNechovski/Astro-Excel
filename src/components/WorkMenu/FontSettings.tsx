@@ -54,10 +54,10 @@ const FontSettings: React.FC = () => {
   };
 
   return (
-    <div className="font-controls">
+    <div>
       <span>
         <label>Font Size:</label>
-        <select id="font-size-select" onChange={handleFontSizeChange}>
+        <select onChange={handleFontSizeChange}>
           {fontSizes.map((size) => (
             <option key={size} value={size}>
               {size}
@@ -67,7 +67,7 @@ const FontSettings: React.FC = () => {
       </span>
       <span>
         <label>Font Family:</label>
-        <select id="font-family-select" onChange={handleFontFamilyChange}>
+        <select onChange={handleFontFamilyChange}>
           <option value="Arial">Arial</option>
           <option value="Times New Roman">Times New Roman</option>
           <option value="Courier New">Courier New</option>
