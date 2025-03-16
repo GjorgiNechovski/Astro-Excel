@@ -5,6 +5,7 @@ import Grid from '../components/Grid/Grid';
 import { createInitialGrid } from '../util/functions/generateInitialGrid';
 import ColorPicker from '../components/WorkMenu/ColorPicker';
 import FontSettings from '../components/WorkMenu/FontSettings';
+import CSVControls from '../components/WorkMenu/CSVControls.vue'; 
 
 const cells = createInitialGrid(50, 25);
 ---
@@ -14,13 +15,13 @@ const cells = createInitialGrid(50, 25);
     <ColorPicker client:load />
     <AlignmentButtons client:load />
     <FontSettings client:load />
+    <CSVControls client:load />  
   </div>
   <CellDetails client:load />
   <div class="grid-wrapper">
     <Grid client:load cells={cells} />
   </div>
 </div>
-
 
 <style>
 html, body {
@@ -40,7 +41,8 @@ html, body {
   display: flex;
   justify-content: flex-start; 
   gap: 20px;
-  margin-bottom: 10px; 
+  margin-bottom: 10px;
+  align-items: center; 
 }
 
 .grid-wrapper {
@@ -48,6 +50,4 @@ html, body {
   overflow: auto;  
   max-width: 100%; 
 }
-
-
 </style>
