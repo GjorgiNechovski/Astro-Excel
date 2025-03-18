@@ -1,4 +1,3 @@
-<!-- src/components/WorkMenu/CSVControls.vue -->
 <template>
   <div class="csv-controls">
     <button @click="exportToCSV" class="csv-button">Export CSV</button>

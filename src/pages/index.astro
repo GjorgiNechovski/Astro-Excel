@@ -6,6 +6,7 @@ import { createInitialGrid } from '../util/functions/generateInitialGrid';
 import ColorPicker from '../components/WorkMenu/ColorPicker';
 import FontSettings from '../components/WorkMenu/FontSettings';
 import CSVControls from '../components/WorkMenu/CSVControls.vue'; 
+import Help from '../components/WorkMenu/Help.vue';
 
 const cells = createInitialGrid(50, 25);
 ---
@@ -16,6 +17,7 @@ const cells = createInitialGrid(50, 25);
     <AlignmentButtons client:load />
     <FontSettings client:load />
     <CSVControls client:load />  
+    <Help client:load />
   </div>
   <CellDetails client:load />
   <div class="grid-wrapper">

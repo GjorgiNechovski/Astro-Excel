@@ -91,6 +91,161 @@ export const evaluateFormula = (
     default:
       result = formula;
       break;
+
+    case "count":
+      result = 0;
+      for (let i = minRow; i <= maxRow; i++) {
+        for (let j = minCol; j <= maxCol; j++) {
+          const cell = grid.find((c) => c.row === i && c.col === j);
+          if (cell && !isNaN(Number(cell.realValue)) && cell.realValue !== "") {
+            result++;
+          }
+        }
+      }
+      break;
+
+    case "counta":
+      result = 0;
+      for (let i = minRow; i <= maxRow; i++) {
+        for (let j = minCol; j <= maxCol; j++) {
+          const cell = grid.find((c) => c.row === i && c.col === j);
+          if (cell && cell.realValue !== "") {
+            result++;
+          }
+        }
+      }
+      break;
+
+    case "product":
+      result = 1;
+      for (let i = minRow; i <= maxRow; i++) {
+        for (let j = minCol; j <= maxCol; j++) {
+          const cell = grid.find((c) => c.row === i && c.col === j);
+          if (cell && !isNaN(Number(cell.realValue))) {
+            result *= Number(cell.realValue);
+          }
+        }
+      }
+      break;
+
+    case "stdev":
+      let values: number[] = [];
+      for (let i = minRow; i <= maxRow; i++) {
+        for (let j = minCol; j <= maxCol; j++) {
+          const cell = grid.find((c) => c.row === i && c.col === j);
+          if (cell && !isNaN(Number(cell.realValue))) {
+            values.push(Number(cell.realValue));
+          }
+        }
+      }
+      if (values.length === 0) {
+        result = 0;
+        break;
+      }
+      const mean = values.reduce((a, b) => a + b, 0) / values.length;
+      const variance =
+        values.reduce((a, b) => a + Math.pow(b - mean, 2), 0) / values.length;
+      result = Math.sqrt(variance);
+      break;
+
+    case "median":
+      let numbers: number[] = [];
+      for (let i = minRow; i <= maxRow; i++) {
+        for (let j = minCol; j <= maxCol; j++) {
+          const cell = grid.find((c) => c.row === i && c.col === j);
+          if (cell && !isNaN(Number(cell.realValue))) {
+            numbers.push(Number(cell.realValue));
+          }
+        }
+      }
+      if (numbers.length === 0) {
+        result = 0;
+        break;
+      }
+      numbers.sort((a, b) => a - b);
+      const mid = Math.floor(numbers.length / 2);
+      result =
+        numbers.length % 2 === 0
+          ? (numbers[mid - 1] + numbers[mid]) / 2
+          : numbers[mid];
+      break;
+
+    case "if":
+      const conditionMatch = formula.match(/IF\(([^,]+),([^,]+),(.+)\)/);
+      if (!conditionMatch) {
+        result = "Invalid IF syntax";
+        break;
+      }
+      const [_, condition, valueIfTrue, valueIfFalse] = conditionMatch;
+      const [ref, operator, threshold] = condition.split(/([><=]+)/);
+      const { row, col } = cellReferenceToIndices(ref.trim());
+      const cell = grid.find((c) => c.row === row && c.col === col);
+      const cellValue = cell ? Number(cell.realValue) : 0;
+      const threshNum = Number(threshold.trim());
+
+      let isTrue: boolean;
+      switch (operator) {
+        case ">":
+          isTrue = cellValue > threshNum;
+          break;
+        case "<":
+          isTrue = cellValue < threshNum;
+          break;
+        case "=":
+          isTrue = cellValue === threshNum;
+          break;
+        default:
+          result = "Invalid operator";
+          return result;
+      }
+      result = isTrue ? valueIfTrue.trim() : valueIfFalse.trim();
+      break;
+
+    case "concat":
+      result = "";
+      for (let i = minRow; i <= maxRow; i++) {
+        for (let j = minCol; j <= maxCol; j++) {
+          const cell = grid.find((c) => c.row === i && c.col === j);
+          if (cell) {
+            result += String(cell.realValue);
+          }
+        }
+      }
+      break;
+
+    case "power":
+      const powerArgs = formula.match(/POWER\(([^,]+),([^)]+)\)/);
+      if (!powerArgs || powerArgs.length < 3) {
+        result = "Invalid POWER syntax";
+        break;
+      }
+      const baseRef = cellReferenceToIndices(powerArgs[1].trim());
+      const expRef = cellReferenceToIndices(powerArgs[2].trim());
+      const baseCell = grid.find(
+        (c) => c.row === baseRef.row && c.col === baseRef.col
+      );
+      const expCell = grid.find(
+        (c) => c.row === expRef.row && c.col === expRef.col
+      );
+      const base = baseCell ? Number(baseCell.realValue) : 0;
+      const exponent = expCell ? Number(expCell.realValue) : 0;
+      result = Math.pow(base, exponent);
+      break;
+
+    case "round":
+      const args = formula.match(/ROUND\(([^,]+),([^)]+)\)/);
+      if (!args || args.length < 3) {
+        result = "Invalid ROUND syntax";
+        break;
+      }
+      const numRef = cellReferenceToIndices(args[1].trim());
+      const decimals = Number(args[2].trim());
+      const numCell = grid.find(
+        (c) => c.row === numRef.row && c.col === numRef.col
+      );
+      const number = numCell ? Number(numCell.realValue) : 0;
+      result = Number(number.toFixed(decimals));
+      break;
   }
 
   return result;
