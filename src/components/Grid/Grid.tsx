@@ -4,9 +4,10 @@ import {
   handleMouseDown,
   handleMouseEnter,
 } from "../../util/functions/keyboard";
-import type { Cell } from "../../models/cell";
+import { Cell } from "../../models/cell";
 import { state } from "../../state/stateManager";
 import { evaluateFormula } from "../../util/functions/math";
+import { cellHeight, cellWidth } from "../../assets/contants";
 
 interface GridProps {
   cells: Cell[];
@@ -16,6 +17,9 @@ export default function Grid({ cells: initialCells }: GridProps) {
   const [grid, setGrid] = useState<Cell[]>(initialCells);
   const [numRows, setNumRows] = useState<number>(
     Math.max(...initialCells.map((cell) => cell.row)) + 1
+  );
+  const [numCols, setNumCols] = useState<number>(
+    Math.max(...initialCells.map((cell) => cell.col)) + 1
   );
   const [selectedCells, setSelectedCells] = useState<
     { row: number; col: number }[]
@@ -27,14 +31,123 @@ export default function Grid({ cells: initialCells }: GridProps) {
     startPos: number;
   } | null>(null);
 
+  const gridRef = useRef<HTMLDivElement>(null);
   const inputRefs = useRef<{ [key: string]: HTMLInputElement | null }>({});
+
+  const getColumnLabel = (col: number): string => {
+    let label = "";
+    let tempCol = col - 1;
+    do {
+      label = String.fromCharCode(65 + (tempCol % 26)) + label;
+      tempCol = Math.floor(tempCol / 26) - 1;
+    } while (tempCol >= 0);
+    return label;
+  };
+
+  const expandGrid = (direction: "row" | "col") => {
+    const newCells: Cell[] = [];
+    if (direction === "row") {
+      const newRowStart = numRows;
+      const newRowEnd = newRowStart + 10;
+      for (let i = newRowStart; i < newRowEnd; i++) {
+        for (let j = 0; j < numCols; j++) {
+          const isHeader = j === 0;
+          const newCell = new Cell(
+            isHeader ? i.toString() : "",
+            isHeader ? i.toString() : "",
+            i,
+            j,
+            isHeader,
+            {
+              width: `${cellWidth}px`,
+              height: `${cellHeight}px`,
+              border: "1px solid black",
+              padding: "0",
+              textAlign: isHeader ? "center" : "start",
+              backgroundColor: isHeader ? "#ff9563" : "white",
+            }
+          );
+          newCells.push(newCell);
+        }
+      }
+      setNumRows(newRowEnd);
+    } else if (direction === "col") {
+      const newColStart = numCols;
+      const newColEnd = newColStart + 10;
+      for (let j = newColStart; j < newColEnd; j++) {
+        for (let i = 0; i < numRows; i++) {
+          const isHeader = i === 0;
+          const colLabel = getColumnLabel(j);
+          const newCell = new Cell(
+            isHeader ? colLabel : "",
+            isHeader ? colLabel : "",
+            i,
+            j,
+            isHeader,
+            {
+              width: `${cellWidth}px`,
+              height: `${cellHeight}px`,
+              border: "1px solid black",
+              padding: "0",
+              textAlign: isHeader ? "center" : "start",
+              backgroundColor: isHeader ? "#ff9563" : "white",
+            }
+          );
+          newCells.push(newCell);
+        }
+      }
+      setNumCols(newColEnd);
+    }
+
+    if (newCells.length > 0) {
+      const updatedGrid = [...grid, ...newCells];
+      setGrid(updatedGrid);
+      state.setGrid(updatedGrid);
+    }
+  };
+
+  const handleScroll = () => {
+    const gridElement = gridRef.current;
+    if (!gridElement) return;
+
+    const {
+      scrollTop,
+      scrollHeight,
+      clientHeight,
+      scrollLeft,
+      scrollWidth,
+      clientWidth,
+    } = gridElement;
+
+    if (scrollHeight - scrollTop - clientHeight < 10) {
+      expandGrid("row");
+    }
+
+    if (scrollWidth - scrollLeft - clientWidth < 10) {
+      expandGrid("col");
+    }
+  };
+
+  useEffect(() => {
+    const gridElement = gridRef.current;
+    if (gridElement) {
+      gridElement.addEventListener("scroll", handleScroll);
+    }
+    return () => {
+      if (gridElement) {
+        gridElement.removeEventListener("scroll", handleScroll);
+      }
+    };
+  }, [numRows, numCols]);
 
   useEffect(() => {
     const updateGrid = () => {
       if (JSON.stringify(state.grid) !== JSON.stringify(grid)) {
         setGrid([...state.grid]);
         const rows = Math.max(...state.grid.map((cell) => cell.row)) + 1;
+        const cols = Math.max(...state.grid.map((cell) => cell.col)) + 1;
         setNumRows(rows);
+        setNumCols(cols);
       }
     };
 
@@ -55,7 +168,10 @@ export default function Grid({ cells: initialCells }: GridProps) {
     const updatedGrid = grid.map((cell) => {
       if (cell.displayValue.endsWith("=")) {
         const formula = cell.displayValue.slice(0, -1);
-        const result = evaluateFormula(formula, grid);
+        const evaluatingCells = new Set<string>();
+        const cellKey = `${cell.row}-${cell.col}`;
+        evaluatingCells.add(cellKey); // Add current cell to prevent self-reference
+        const result = evaluateFormula(formula, grid, evaluatingCells);
         return { ...cell, realValue: result };
       }
       return cell;
@@ -74,21 +190,13 @@ export default function Grid({ cells: initialCells }: GridProps) {
       const formula = value.slice(0, -1);
       updatedGrid = grid.map((cell) =>
         cell.row === row && cell.col === col
-          ? {
-              ...cell,
-              displayValue: `${formula}=`,
-              realValue: value,
-            }
+          ? { ...cell, displayValue: `${formula}=`, realValue: value }
           : cell
       );
     } else {
       updatedGrid = grid.map((cell) =>
         cell.row === row && cell.col === col
-          ? {
-              ...cell,
-              displayValue: value,
-              realValue: value,
-            }
+          ? { ...cell, displayValue: value, realValue: value }
           : cell
       );
     }
@@ -156,9 +264,9 @@ export default function Grid({ cells: initialCells }: GridProps) {
         return cell;
       });
 
-      // @ts-ignore
+      //@ts-ignore
       setGrid(updatedGrid);
-      // @ts-ignore
+      //@ts-ignore
       state.setGrid(updatedGrid);
       setResizing({
         type,
@@ -229,6 +337,8 @@ export default function Grid({ cells: initialCells }: GridProps) {
                       setSelectedCells
                     );
                     if (newCell) {
+                      if (newCell.row >= numRows - 1) expandGrid("row");
+                      if (newCell.col >= numCols - 1) expandGrid("col");
                       const newInputKey = `${newCell.row}-${newCell.col}`;
                       const newInputElement = inputRefs.current[newInputKey];
                       if (newInputElement) {
@@ -295,5 +405,13 @@ export default function Grid({ cells: initialCells }: GridProps) {
     return rowsArray;
   };
 
-  return <div onMouseUp={() => setIsSelecting(false)}>{getRows()}</div>;
+  return (
+    <div
+      ref={gridRef}
+      style={{ overflow: "auto", height: "100%", width: "100%" }}
+      onMouseUp={() => setIsSelecting(false)}
+    >
+      {getRows()}
+    </div>
+  );
 }

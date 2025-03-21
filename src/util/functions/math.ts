@@ -19,7 +19,8 @@ export const cellReferenceToIndices = (
 
 export const evaluateFormula = (
   formula: string,
-  grid: Cell[]
+  grid: Cell[],
+  evaluatingCells: Set<string> = new Set()
 ): number | string | void => {
   const functionName = formula.split("(")[0].toLowerCase();
   const cellReferences = parseFormula(formula);
@@ -31,6 +32,15 @@ export const evaluateFormula = (
   const maxRow = Math.max(...refs.map((r) => r.row));
   const minCol = Math.min(...refs.map((r) => r.col));
   const maxCol = Math.max(...refs.map((r) => r.col));
+
+  for (let i = minRow; i <= maxRow; i++) {
+    for (let j = minCol; j <= maxCol; j++) {
+      const cellKey = `${i}-${j}`;
+      if (evaluatingCells.has(cellKey)) {
+        return "Circular reference detected";
+      }
+    }
+  }
 
   let result: number | string | void;
 
@@ -86,10 +96,6 @@ export const evaluateFormula = (
         }
       }
       result = result !== -Infinity ? result : 0;
-      break;
-
-    default:
-      result = formula;
       break;
 
     case "count":
@@ -179,6 +185,12 @@ export const evaluateFormula = (
       const [_, condition, valueIfTrue, valueIfFalse] = conditionMatch;
       const [ref, operator, threshold] = condition.split(/([><=]+)/);
       const { row, col } = cellReferenceToIndices(ref.trim());
+      const cellKey = `${row}-${col}`;
+      if (evaluatingCells.has(cellKey)) {
+        result = "Circular reference detected";
+        break;
+      }
+      evaluatingCells.add(cellKey);
       const cell = grid.find((c) => c.row === row && c.col === col);
       const cellValue = cell ? Number(cell.realValue) : 0;
       const threshNum = Number(threshold.trim());
@@ -199,6 +211,7 @@ export const evaluateFormula = (
           return result;
       }
       result = isTrue ? valueIfTrue.trim() : valueIfFalse.trim();
+      evaluatingCells.delete(cellKey);
       break;
 
     case "concat":
@@ -221,6 +234,14 @@ export const evaluateFormula = (
       }
       const baseRef = cellReferenceToIndices(powerArgs[1].trim());
       const expRef = cellReferenceToIndices(powerArgs[2].trim());
+      const baseKey = `${baseRef.row}-${baseRef.col}`;
+      const expKey = `${expRef.row}-${expRef.col}`;
+      if (evaluatingCells.has(baseKey) || evaluatingCells.has(expKey)) {
+        result = "Circular reference detected";
+        break;
+      }
+      evaluatingCells.add(baseKey);
+      evaluatingCells.add(expKey);
       const baseCell = grid.find(
         (c) => c.row === baseRef.row && c.col === baseRef.col
       );
@@ -230,6 +251,8 @@ export const evaluateFormula = (
       const base = baseCell ? Number(baseCell.realValue) : 0;
       const exponent = expCell ? Number(expCell.realValue) : 0;
       result = Math.pow(base, exponent);
+      evaluatingCells.delete(baseKey);
+      evaluatingCells.delete(expKey);
       break;
 
     case "round":
@@ -239,12 +262,23 @@ export const evaluateFormula = (
         break;
       }
       const numRef = cellReferenceToIndices(args[1].trim());
+      const numKey = `${numRef.row}-${numRef.col}`;
+      if (evaluatingCells.has(numKey)) {
+        result = "Circular reference detected";
+        break;
+      }
+      evaluatingCells.add(numKey);
       const decimals = Number(args[2].trim());
       const numCell = grid.find(
         (c) => c.row === numRef.row && c.col === numRef.col
       );
       const number = numCell ? Number(numCell.realValue) : 0;
       result = Number(number.toFixed(decimals));
+      evaluatingCells.delete(numKey);
+      break;
+
+    default:
+      result = formula;
       break;
   }
 
