@@ -8,7 +8,7 @@ import { Cell } from "../../models/cell";
 import { state } from "../../state/stateManager";
 import { evaluateFormula } from "../../util/functions/math";
 import ContextMenu from "../ContextMenu/ContextMenu";
-import { cellHeight, cellWidth } from "../../models/contants";
+import { createCell } from "../../util/functions/cell-helper";
 
 interface GridProps {
   cells: Cell[];
@@ -63,23 +63,8 @@ export default function Grid({ cells: initialCells }: GridProps) {
       for (let i = newRowStart; i < newRowEnd; i++) {
         for (let j = 0; j < numCols; j++) {
           const isHeader = j === 0;
-          const newCell = new Cell(
-            isHeader ? i.toString() : "",
-            isHeader ? i.toString() : "",
-            i,
-            j,
-            isHeader,
-            undefined,
-            {
-              width: `${cellWidth}px`,
-              height: `${cellHeight}px`,
-              border: "1px solid black",
-              padding: "0",
-              textAlign: isHeader ? "center" : "start",
-              backgroundColor: isHeader ? "#ff9563" : "white",
-            }
-          );
-          newCells.push(newCell);
+          const value = isHeader ? i.toString() : "";
+          newCells.push(createCell(value, value, i, j, isHeader));
         }
       }
       setNumRows(newRowEnd);
@@ -89,24 +74,8 @@ export default function Grid({ cells: initialCells }: GridProps) {
       for (let j = newColStart; j < newColEnd; j++) {
         for (let i = 0; i < numRows; i++) {
           const isHeader = i === 0;
-          const colLabel = getColumnLabel(j);
-          const newCell = new Cell(
-            isHeader ? colLabel : "",
-            isHeader ? colLabel : "",
-            i,
-            j,
-            isHeader,
-            undefined,
-            {
-              width: `${cellWidth}px`,
-              height: `${cellHeight}px`,
-              border: "1px solid black",
-              padding: "0",
-              textAlign: isHeader ? "center" : "start",
-              backgroundColor: isHeader ? "#ff9563" : "white",
-            }
-          );
-          newCells.push(newCell);
+          const value = isHeader ? getColumnLabel(j) : "";
+          newCells.push(createCell(value, value, i, j, isHeader));
         }
       }
       setNumCols(newColEnd);
