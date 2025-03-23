@@ -1,4 +1,4 @@
-import { cellHeight, cellWidth } from "../../assets/contants";
+import { cellHeight, cellWidth } from "../../models/contants";
 import { Cell, type ICellStyle } from "../../models/cell";
 
 export const createInitialGrid = (rows: number, cols: number) => {

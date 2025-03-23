@@ -16,7 +16,7 @@
 import { defineComponent, ref } from "vue";
 import { state } from "../../state/stateManager";
 import { Cell, type ICellStyle } from "../../models/cell";
-import { cellHeight, cellWidth } from "../../assets/contants";
+import { cellHeight, cellWidth } from "../../models/contants";
 
 export default defineComponent({
   name: "CSVControls",

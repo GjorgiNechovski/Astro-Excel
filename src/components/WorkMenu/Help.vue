@@ -119,19 +119,6 @@
             <strong>Example:</strong> <code>POWER(A1, B1)</code> raises 10 to 20
             = 1e20.
           </p>
-
-          <h3>ROUND</h3>
-          <p>
-            <strong>Syntax:</strong> <code>ROUND(numberCell, decimals)</code>
-          </p>
-          <p>
-            <strong>Use Case:</strong> Rounds a number to specified decimal
-            places.
-          </p>
-          <p>
-            <strong>Example:</strong> <code>ROUND(A2, 1)</code> rounds 15 to
-            15.0.
-          </p>
         </div>
         <button @click="showHelp = false" class="close-btn">Close</button>
       </div>

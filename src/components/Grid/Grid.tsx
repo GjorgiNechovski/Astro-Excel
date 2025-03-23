@@ -7,7 +7,8 @@ import {
 import { Cell } from "../../models/cell";
 import { state } from "../../state/stateManager";
 import { evaluateFormula } from "../../util/functions/math";
-import { cellHeight, cellWidth } from "../../assets/contants";
+import ContextMenu from "../ContextMenu/ContextMenu";
+import { cellHeight, cellWidth } from "../../models/contants";
 
 interface GridProps {
   cells: Cell[];
@@ -30,9 +31,19 @@ export default function Grid({ cells: initialCells }: GridProps) {
     index: number;
     startPos: number;
   } | null>(null);
+  const [contextMenu, setContextMenu] = useState<{
+    x: number;
+    y: number;
+  } | null>(null);
 
   const gridRef = useRef<HTMLDivElement>(null);
   const inputRefs = useRef<{ [key: string]: HTMLInputElement | null }>({});
+
+  useEffect(() => {
+    const handleClick = () => setContextMenu(null);
+    document.addEventListener("click", handleClick);
+    return () => document.removeEventListener("click", handleClick);
+  }, []);
 
   const getColumnLabel = (col: number): string => {
     let label = "";
@@ -58,6 +69,7 @@ export default function Grid({ cells: initialCells }: GridProps) {
             i,
             j,
             isHeader,
+            undefined,
             {
               width: `${cellWidth}px`,
               height: `${cellHeight}px`,
@@ -84,6 +96,7 @@ export default function Grid({ cells: initialCells }: GridProps) {
             i,
             j,
             isHeader,
+            undefined,
             {
               width: `${cellWidth}px`,
               height: `${cellHeight}px`,
@@ -170,7 +183,7 @@ export default function Grid({ cells: initialCells }: GridProps) {
         const formula = cell.displayValue.slice(0, -1);
         const evaluatingCells = new Set<string>();
         const cellKey = `${cell.row}-${cell.col}`;
-        evaluatingCells.add(cellKey); // Add current cell to prevent self-reference
+        evaluatingCells.add(cellKey);
         const result = evaluateFormula(formula, grid, evaluatingCells);
         return { ...cell, realValue: result };
       }
@@ -295,6 +308,13 @@ export default function Grid({ cells: initialCells }: GridProps) {
     };
   }, [resizing]);
 
+  const handleContextMenu = (e: React.MouseEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    if (selectedCells.length > 0) {
+      setContextMenu({ x: e.clientX, y: e.clientY });
+    }
+  };
+
   const getRows = () => {
     const rowsArray = [];
     for (let i = 0; i < numRows; i++) {
@@ -303,10 +323,19 @@ export default function Grid({ cells: initialCells }: GridProps) {
         <div key={i} style={{ display: "flex", position: "relative" }}>
           {rowCells.map((cell, index) => {
             const inputKey = `${cell.row}-${cell.col}`;
+            let displayText = cell.realValue;
+            if (
+              cell.roundNumbers !== undefined &&
+              cell.realValue !== "" &&
+              !isNaN(Number(cell.realValue))
+            ) {
+              displayText = Number(cell.realValue).toFixed(cell.roundNumbers);
+            }
+
             return (
               <div key={index} style={{ position: "relative" }}>
                 <input
-                  value={cell.realValue}
+                  value={displayText}
                   style={{
                     width: cell.styles?.width || "100px",
                     height: cell.styles?.height || "30px",
@@ -346,14 +375,16 @@ export default function Grid({ cells: initialCells }: GridProps) {
                       }
                     }
                   }}
-                  onMouseDown={() =>
-                    handleMouseDown(
-                      cell.row,
-                      cell.col,
-                      setSelectedCells,
-                      setIsSelecting
-                    )
-                  }
+                  onMouseDown={(e) => {
+                    if (e.button === 0) {
+                      handleMouseDown(
+                        cell.row,
+                        cell.col,
+                        setSelectedCells,
+                        setIsSelecting
+                      );
+                    }
+                  }}
                   onMouseEnter={() =>
                     handleMouseEnter(
                       cell.row,
@@ -410,8 +441,28 @@ export default function Grid({ cells: initialCells }: GridProps) {
       ref={gridRef}
       style={{ overflow: "auto", height: "100%", width: "100%" }}
       onMouseUp={() => setIsSelecting(false)}
+      onContextMenu={handleContextMenu}
     >
       {getRows()}
+      {contextMenu && (
+        <ContextMenu
+          x={contextMenu.x}
+          y={contextMenu.y}
+          onClose={() => setContextMenu(null)}
+          onSetRoundNumbers={(decimals) => {
+            const updatedGrid = grid.map((cell) =>
+              selectedCells.some(
+                (sel) => sel.row === cell.row && sel.col === cell.col
+              )
+                ? { ...cell, roundNumbers: decimals }
+                : cell
+            );
+            setGrid(updatedGrid);
+            state.setGrid(updatedGrid);
+            setContextMenu(null);
+          }}
+        />
+      )}
     </div>
   );
 }

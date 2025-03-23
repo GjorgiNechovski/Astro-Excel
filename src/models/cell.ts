@@ -22,6 +22,7 @@ export class Cell {
     public row: number,
     public col: number,
     public disabled: boolean,
+    public roundNumbers?: number,
     public styles?: ICellStyle | undefined
   ) {}
 }

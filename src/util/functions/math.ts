@@ -255,28 +255,6 @@ export const evaluateFormula = (
       evaluatingCells.delete(expKey);
       break;
 
-    case "round":
-      const args = formula.match(/ROUND\(([^,]+),([^)]+)\)/);
-      if (!args || args.length < 3) {
-        result = "Invalid ROUND syntax";
-        break;
-      }
-      const numRef = cellReferenceToIndices(args[1].trim());
-      const numKey = `${numRef.row}-${numRef.col}`;
-      if (evaluatingCells.has(numKey)) {
-        result = "Circular reference detected";
-        break;
-      }
-      evaluatingCells.add(numKey);
-      const decimals = Number(args[2].trim());
-      const numCell = grid.find(
-        (c) => c.row === numRef.row && c.col === numRef.col
-      );
-      const number = numCell ? Number(numCell.realValue) : 0;
-      result = Number(number.toFixed(decimals));
-      evaluatingCells.delete(numKey);
-      break;
-
     default:
       result = formula;
       break;

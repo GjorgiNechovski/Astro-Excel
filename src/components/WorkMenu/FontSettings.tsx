@@ -1,7 +1,7 @@
 import React from "react";
 import { state } from "../../state/stateManager";
 import type { ICellStyle, TextAlign } from "../../models/cell";
-import { fontSizes } from "../../assets/contants";
+import { fontSizes } from "../../models/contants";
 
 const FontSettings: React.FC = () => {
   const updateStyles = (
