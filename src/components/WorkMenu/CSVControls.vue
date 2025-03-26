@@ -100,6 +100,7 @@ export default defineComponent({
               rowIndex,
               colIndex,
               isHeader,
+              undefined,
               cellStyle
             );
 

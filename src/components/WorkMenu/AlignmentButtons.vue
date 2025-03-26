@@ -30,6 +30,7 @@ export default defineComponent({
               cell.row,
               cell.col,
               cell.disabled,
+              undefined,
               {
                 ...restStyles,
                 textAlign: alignment,
