@@ -1,6 +1,6 @@
-import React from "react";
-import { state } from "../../state/stateManager";
-import type { ICellStyle, TextAlign } from "../../models/cell";
+import React from 'react';
+import { state } from '../../state/stateManager';
+import type { ICellStyle, TextAlign } from '../../models/cell';
 
 const ColorPickers: React.FC = () => {
   const updateStyles = (property: keyof ICellStyle, value: string) => {
@@ -10,14 +10,15 @@ const ColorPickers: React.FC = () => {
       updatedGrid.forEach((cell) => {
         if (
           state.selectedCells.some(
-            (selected) => selected.row === cell.row && selected.col === cell.col
+            (selected) =>
+              selected.row === cell.row && selected.col === cell.col,
           )
         ) {
           if (!cell.styles) {
             cell.styles = {} as ICellStyle;
           }
 
-          if (property === "textAlign") {
+          if (property === 'textAlign') {
             cell.styles[property] = value as TextAlign;
           } else {
             cell.styles[property] = value;
@@ -30,30 +31,30 @@ const ColorPickers: React.FC = () => {
   };
 
   const handleBackgroundColorChange = (
-    e: React.ChangeEvent<HTMLInputElement>
+    e: React.ChangeEvent<HTMLInputElement>,
   ) => {
-    updateStyles("backgroundColor", e.target.value);
+    updateStyles('backgroundColor', e.target.value);
   };
 
   const handleTextColorChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    updateStyles("color", e.target.value);
+    updateStyles('color', e.target.value);
   };
 
   return (
-    <div className="color-pickers">
+    <div className='color-pickers'>
       <span>
         <label>Background Color:</label>
         <input
-          id="background-color-picker"
-          type="color"
+          id='background-color-picker'
+          type='color'
           onChange={handleBackgroundColorChange}
         />
       </span>
       <span>
         <label>Text Color:</label>
         <input
-          id="text-color-picker"
-          type="color"
+          id='text-color-picker'
+          type='color'
           onChange={handleTextColorChange}
         />
       </span>

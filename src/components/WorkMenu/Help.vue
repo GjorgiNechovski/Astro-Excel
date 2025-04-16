@@ -127,10 +127,10 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from "vue";
+import { defineComponent } from 'vue';
 
 export default defineComponent({
-  name: "FormulaHelp",
+  name: 'FormulaHelp',
   data() {
     return {
       showHelp: false,

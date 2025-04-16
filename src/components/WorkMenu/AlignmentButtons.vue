@@ -7,12 +7,12 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from "vue";
-import { state } from "../../state/stateManager";
-import { Cell, type TextAlign, type ICellStyle } from "../../models/cell";
+import { defineComponent } from 'vue';
+import { state } from '../../state/stateManager';
+import { Cell, type TextAlign, type ICellStyle } from '../../models/cell';
 
 export default defineComponent({
-  name: "AlignmentButtons",
+  name: 'AlignmentButtons',
   setup() {
     const updateAlignment = (alignment: TextAlign) => {
       if (state.selectedCells.length > 0) {
@@ -20,7 +20,7 @@ export default defineComponent({
           if (
             state.selectedCells.some(
               (selected) =>
-                selected.row === cell.row && selected.col === cell.col
+                selected.row === cell.row && selected.col === cell.col,
             )
           ) {
             const { textAlign, ...restStyles } = cell.styles || {};
@@ -34,7 +34,7 @@ export default defineComponent({
               {
                 ...restStyles,
                 textAlign: alignment,
-              } as ICellStyle
+              } as ICellStyle,
             );
           }
           return cell;
@@ -43,9 +43,9 @@ export default defineComponent({
       }
     };
 
-    const alignLeft = () => updateAlignment("left");
-    const alignCenter = () => updateAlignment("center");
-    const alignRight = () => updateAlignment("right");
+    const alignLeft = () => updateAlignment('left');
+    const alignCenter = () => updateAlignment('center');
+    const alignRight = () => updateAlignment('right');
 
     return {
       alignLeft,

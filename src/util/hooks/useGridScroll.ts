@@ -1,6 +1,6 @@
-import { useEffect, useRef } from "react";
-import { Cell } from "../../models/cell";
-import { createCell } from "../../util/functions/cell-helper";
+import { useEffect, useRef } from 'react';
+import { Cell } from '../../models/cell';
+import { createCell } from '../../util/functions/cell-helper';
 
 export const useGridScroll = (
   numRows: number,
@@ -9,30 +9,30 @@ export const useGridScroll = (
   setGrid: (grid: Cell[]) => void,
   setNumRows: (rows: number) => void,
   setNumCols: (cols: number) => void,
-  getColumnLabel: (col: number) => string
+  getColumnLabel: (col: number) => string,
 ) => {
   const gridRef = useRef<HTMLDivElement>(null);
 
-  const expandGrid = (direction: "row" | "col") => {
+  const expandGrid = (direction: 'row' | 'col') => {
     const newCells: Cell[] = [];
-    if (direction === "row") {
+    if (direction === 'row') {
       const newRowStart = numRows;
       const newRowEnd = newRowStart + 10;
       for (let i = newRowStart; i < newRowEnd; i++) {
         for (let j = 0; j < numCols; j++) {
           const isHeader = j === 0;
-          const value = isHeader ? i.toString() : "";
+          const value = isHeader ? i.toString() : '';
           newCells.push(createCell(value, value, i, j, isHeader));
         }
       }
       setNumRows(newRowEnd);
-    } else if (direction === "col") {
+    } else if (direction === 'col') {
       const newColStart = numCols;
       const newColEnd = newColStart + 10;
       for (let j = newColStart; j < newColEnd; j++) {
         for (let i = 0; i < numRows; i++) {
           const isHeader = i === 0;
-          const value = isHeader ? getColumnLabel(j) : "";
+          const value = isHeader ? getColumnLabel(j) : '';
           newCells.push(createCell(value, value, i, j, isHeader));
         }
       }
@@ -59,23 +59,23 @@ export const useGridScroll = (
     } = gridElement;
 
     if (scrollHeight - scrollTop - clientHeight < 10) {
-      expandGrid("row");
+      expandGrid('row');
     }
 
     if (scrollWidth - scrollLeft - clientWidth < 10) {
-      expandGrid("col");
+      expandGrid('col');
     }
   };
 
   useEffect(() => {
     const gridElement = gridRef.current;
     if (gridElement) {
-      gridElement.addEventListener("scroll", handleScroll);
+      gridElement.addEventListener('scroll', handleScroll);
     }
 
     return () => {
       if (gridElement) {
-        gridElement.removeEventListener("scroll", handleScroll);
+        gridElement.removeEventListener('scroll', handleScroll);
       }
     };
   }, [numRows, numCols]);

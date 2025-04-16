@@ -1,4 +1,4 @@
-import type { Cell } from "../models/cell";
+import type { Cell } from '../models/cell';
 
 type SelectedCell = {
   row: number;

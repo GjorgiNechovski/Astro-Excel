@@ -1,10 +1,10 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from 'react';
 import {
   handleKeyDown,
   handleMouseDown,
   handleMouseEnter,
-} from "../../util/functions/keyboard";
-import type { Cell } from "../../models/cell";
+} from '../../util/functions/keyboard';
+import type { Cell } from '../../models/cell';
 
 export const useCellSelection = (grid: Cell[], numRows: number) => {
   const [selectedCells, setSelectedCells] = useState<
@@ -41,7 +41,7 @@ export const useCellSelection = (grid: Cell[], numRows: number) => {
     e: React.KeyboardEvent,
     row: number,
     col: number,
-    callback?: (newCell: { row: number; col: number }) => void
+    callback?: (newCell: { row: number; col: number }) => void,
   ) => {
     //@ts-ignore
     const newCell = handleKeyDown(e, row, col, numRows, grid, setSelectedCells);

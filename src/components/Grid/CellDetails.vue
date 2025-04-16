@@ -10,26 +10,26 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, onMounted, onUnmounted, ref, watch } from "vue";
-import { state } from "../../state/stateManager";
+import { defineComponent, onMounted, onUnmounted, ref, watch } from 'vue';
+import { state } from '../../state/stateManager';
 
 export default defineComponent({
-  name: "CellDetails",
+  name: 'CellDetails',
   setup() {
     const highlightedCell = ref<{ row: number; col: number } | null>(null);
-    const highlightedCellValue = ref<string>("");
+    const highlightedCellValue = ref<string>('');
 
     const updateHighlightedCell = () => {
       if (state.selectedCells.length > 0) {
         const { row, col } = state.selectedCells[0];
         const cell = state.grid.find(
-          (cell) => cell.row === row && cell.col === col
+          (cell) => cell.row === row && cell.col === col,
         );
         highlightedCell.value = { row, col };
-        highlightedCellValue.value = cell ? cell.displayValue : "";
+        highlightedCellValue.value = cell ? cell.displayValue : '';
       } else {
         highlightedCell.value = null;
-        highlightedCellValue.value = "";
+        highlightedCellValue.value = '';
       }
     };
 
@@ -38,7 +38,7 @@ export default defineComponent({
         const { row, col } = highlightedCell.value;
         const updatedGrid = state.grid.map((cell) => {
           if (cell.row === row && cell.col === col) {
-            if (newValue.startsWith("=")) {
+            if (newValue.startsWith('=')) {
               return {
                 ...cell,
                 displayValue: newValue,
@@ -61,7 +61,7 @@ export default defineComponent({
 
     onUnmounted(() => {
       state.listeners = state.listeners.filter(
-        (listener) => listener !== updateHighlightedCell
+        (listener) => listener !== updateHighlightedCell,
       );
     });
 

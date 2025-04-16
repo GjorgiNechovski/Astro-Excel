@@ -1,12 +1,12 @@
-import React from "react";
-import { state } from "../../state/stateManager";
-import type { ICellStyle, TextAlign } from "../../models/cell";
-import { fontSizes } from "../../models/contants";
+import React from 'react';
+import { state } from '../../state/stateManager';
+import type { ICellStyle, TextAlign } from '../../models/cell';
+import { fontSizes } from '../../models/contants';
 
 const FontSettings: React.FC = () => {
   const updateStyles = (
     property: keyof ICellStyle,
-    value: string | boolean | TextAlign
+    value: string | boolean | TextAlign,
   ) => {
     if (state.selectedCells.length > 0) {
       const updatedGrid = [...state.grid];
@@ -14,14 +14,15 @@ const FontSettings: React.FC = () => {
       updatedGrid.forEach((cell) => {
         if (
           state.selectedCells.some(
-            (selected) => selected.row === cell.row && selected.col === cell.col
+            (selected) =>
+              selected.row === cell.row && selected.col === cell.col,
           )
         ) {
           if (!cell.styles) {
             cell.styles = {} as ICellStyle;
           }
 
-          if (property === "textAlign") {
+          if (property === 'textAlign') {
             cell.styles[property] = value as TextAlign;
           } else {
             cell.styles[property] = value as string;
@@ -34,23 +35,23 @@ const FontSettings: React.FC = () => {
   };
 
   const handleFontSizeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    updateStyles("fontSize", e.target.value + "px");
+    updateStyles('fontSize', e.target.value + 'px');
   };
 
   const handleFontFamilyChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    updateStyles("fontFamily", e.target.value);
+    updateStyles('fontFamily', e.target.value);
   };
 
   const handleBoldClick = () => {
-    updateStyles("fontWeight", "bold");
+    updateStyles('fontWeight', 'bold');
   };
 
   const handleItalicClick = () => {
-    updateStyles("fontStyle", "italic");
+    updateStyles('fontStyle', 'italic');
   };
 
   const handleUnderlineClick = () => {
-    updateStyles("textDecoration", "underline");
+    updateStyles('textDecoration', 'underline');
   };
 
   return (
@@ -68,21 +69,21 @@ const FontSettings: React.FC = () => {
       <span>
         <label>Font Family:</label>
         <select onChange={handleFontFamilyChange}>
-          <option value="Arial">Arial</option>
-          <option value="Times New Roman">Times New Roman</option>
-          <option value="Courier New">Courier New</option>
-          <option value="Verdana">Verdana</option>
-          <option value="Georgia">Georgia</option>
+          <option value='Arial'>Arial</option>
+          <option value='Times New Roman'>Times New Roman</option>
+          <option value='Courier New'>Courier New</option>
+          <option value='Verdana'>Verdana</option>
+          <option value='Georgia'>Georgia</option>
         </select>
       </span>
       <span>
-        <button onClick={handleBoldClick} title="Bold">
+        <button onClick={handleBoldClick} title='Bold'>
           <strong>B</strong>
         </button>
-        <button onClick={handleItalicClick} title="Italic">
+        <button onClick={handleItalicClick} title='Italic'>
           <em>I</em>
         </button>
-        <button onClick={handleUnderlineClick} title="Underline">
+        <button onClick={handleUnderlineClick} title='Underline'>
           <u>U</u>
         </button>
       </span>

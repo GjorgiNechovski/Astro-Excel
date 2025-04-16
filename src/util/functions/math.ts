@@ -1,4 +1,4 @@
-import type { Cell } from "../../models/cell";
+import type { Cell } from '../../models/cell';
 
 const parseFormula = (formula: string): string[] => {
   const regex = /([A-Z]+\d+)/g;
@@ -6,7 +6,7 @@ const parseFormula = (formula: string): string[] => {
 };
 
 export const cellReferenceToIndices = (
-  ref: string
+  ref: string,
 ): { row: number; col: number } => {
   const colLetters = ref.match(/[A-Z]+/)![0];
   const rowNumber = parseInt(ref.match(/\d+/)![0]);
@@ -20,9 +20,9 @@ export const cellReferenceToIndices = (
 export const evaluateFormula = (
   formula: string,
   grid: Cell[],
-  evaluatingCells: Set<string> = new Set()
+  evaluatingCells: Set<string> = new Set(),
 ): number | string | void => {
-  const functionName = formula.split("(")[0].toLowerCase();
+  const functionName = formula.split('(')[0].toLowerCase();
   const cellReferences = parseFormula(formula);
 
   if (cellReferences.length === 0) return 0;
@@ -37,7 +37,7 @@ export const evaluateFormula = (
     for (let j = minCol; j <= maxCol; j++) {
       const cellKey = `${i}-${j}`;
       if (evaluatingCells.has(cellKey)) {
-        return "Circular reference detected";
+        return 'Circular reference detected';
       }
     }
   }
@@ -45,7 +45,7 @@ export const evaluateFormula = (
   let result: number | string | void;
 
   switch (functionName) {
-    case "sum":
+    case 'sum':
       result = 0;
       for (let i = minRow; i <= maxRow; i++) {
         for (let j = minCol; j <= maxCol; j++) {
@@ -57,7 +57,7 @@ export const evaluateFormula = (
       }
       break;
 
-    case "average":
+    case 'average':
       let sum = 0;
       let count = 0;
       for (let i = minRow; i <= maxRow; i++) {
@@ -72,7 +72,7 @@ export const evaluateFormula = (
       result = count > 0 ? sum / count : 0;
       break;
 
-    case "min":
+    case 'min':
       result = Infinity;
       for (let i = minRow; i <= maxRow; i++) {
         for (let j = minCol; j <= maxCol; j++) {
@@ -85,7 +85,7 @@ export const evaluateFormula = (
       result = result !== Infinity ? result : 0;
       break;
 
-    case "max":
+    case 'max':
       result = -Infinity;
       for (let i = minRow; i <= maxRow; i++) {
         for (let j = minCol; j <= maxCol; j++) {
@@ -98,31 +98,31 @@ export const evaluateFormula = (
       result = result !== -Infinity ? result : 0;
       break;
 
-    case "count":
+    case 'count':
       result = 0;
       for (let i = minRow; i <= maxRow; i++) {
         for (let j = minCol; j <= maxCol; j++) {
           const cell = grid.find((c) => c.row === i && c.col === j);
-          if (cell && !isNaN(Number(cell.realValue)) && cell.realValue !== "") {
+          if (cell && !isNaN(Number(cell.realValue)) && cell.realValue !== '') {
             result++;
           }
         }
       }
       break;
 
-    case "counta":
+    case 'counta':
       result = 0;
       for (let i = minRow; i <= maxRow; i++) {
         for (let j = minCol; j <= maxCol; j++) {
           const cell = grid.find((c) => c.row === i && c.col === j);
-          if (cell && cell.realValue !== "") {
+          if (cell && cell.realValue !== '') {
             result++;
           }
         }
       }
       break;
 
-    case "product":
+    case 'product':
       result = 1;
       for (let i = minRow; i <= maxRow; i++) {
         for (let j = minCol; j <= maxCol; j++) {
@@ -134,7 +134,7 @@ export const evaluateFormula = (
       }
       break;
 
-    case "stdev":
+    case 'stdev':
       let values: number[] = [];
       for (let i = minRow; i <= maxRow; i++) {
         for (let j = minCol; j <= maxCol; j++) {
@@ -154,7 +154,7 @@ export const evaluateFormula = (
       result = Math.sqrt(variance);
       break;
 
-    case "median":
+    case 'median':
       let numbers: number[] = [];
       for (let i = minRow; i <= maxRow; i++) {
         for (let j = minCol; j <= maxCol; j++) {
@@ -176,10 +176,10 @@ export const evaluateFormula = (
           : numbers[mid];
       break;
 
-    case "if":
+    case 'if':
       const conditionMatch = formula.match(/IF\(([^,]+),([^,]+),(.+)\)/);
       if (!conditionMatch) {
-        result = "Invalid IF syntax";
+        result = 'Invalid IF syntax';
         break;
       }
       const [_, condition, valueIfTrue, valueIfFalse] = conditionMatch;
@@ -187,7 +187,7 @@ export const evaluateFormula = (
       const { row, col } = cellReferenceToIndices(ref.trim());
       const cellKey = `${row}-${col}`;
       if (evaluatingCells.has(cellKey)) {
-        result = "Circular reference detected";
+        result = 'Circular reference detected';
         break;
       }
       evaluatingCells.add(cellKey);
@@ -197,25 +197,25 @@ export const evaluateFormula = (
 
       let isTrue: boolean;
       switch (operator) {
-        case ">":
+        case '>':
           isTrue = cellValue > threshNum;
           break;
-        case "<":
+        case '<':
           isTrue = cellValue < threshNum;
           break;
-        case "=":
+        case '=':
           isTrue = cellValue === threshNum;
           break;
         default:
-          result = "Invalid operator";
+          result = 'Invalid operator';
           return result;
       }
       result = isTrue ? valueIfTrue.trim() : valueIfFalse.trim();
       evaluatingCells.delete(cellKey);
       break;
 
-    case "concat":
-      result = "";
+    case 'concat':
+      result = '';
       for (let i = minRow; i <= maxRow; i++) {
         for (let j = minCol; j <= maxCol; j++) {
           const cell = grid.find((c) => c.row === i && c.col === j);
@@ -226,10 +226,10 @@ export const evaluateFormula = (
       }
       break;
 
-    case "power":
+    case 'power':
       const powerArgs = formula.match(/POWER\(([^,]+),([^)]+)\)/);
       if (!powerArgs || powerArgs.length < 3) {
-        result = "Invalid POWER syntax";
+        result = 'Invalid POWER syntax';
         break;
       }
       const baseRef = cellReferenceToIndices(powerArgs[1].trim());
@@ -237,16 +237,16 @@ export const evaluateFormula = (
       const baseKey = `${baseRef.row}-${baseRef.col}`;
       const expKey = `${expRef.row}-${expRef.col}`;
       if (evaluatingCells.has(baseKey) || evaluatingCells.has(expKey)) {
-        result = "Circular reference detected";
+        result = 'Circular reference detected';
         break;
       }
       evaluatingCells.add(baseKey);
       evaluatingCells.add(expKey);
       const baseCell = grid.find(
-        (c) => c.row === baseRef.row && c.col === baseRef.col
+        (c) => c.row === baseRef.row && c.col === baseRef.col,
       );
       const expCell = grid.find(
-        (c) => c.row === expRef.row && c.col === expRef.col
+        (c) => c.row === expRef.row && c.col === expRef.col,
       );
       const base = baseCell ? Number(baseCell.realValue) : 0;
       const exponent = expCell ? Number(expCell.realValue) : 0;

@@ -23,14 +23,14 @@ export class Cell {
     public col: number,
     public disabled: boolean,
     public roundNumbers?: number,
-    public styles?: ICellStyle | undefined
+    public styles?: ICellStyle | undefined,
   ) {}
 }
 
 export type TextAlign =
-  | "left"
-  | "center"
-  | "right"
-  | "justify"
-  | "start"
-  | "end";
+  | 'left'
+  | 'center'
+  | 'right'
+  | 'justify'
+  | 'start'
+  | 'end';

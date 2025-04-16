@@ -1,5 +1,5 @@
-import type { Cell } from "../../models/cell";
-import { state } from "../../state/stateManager";
+import type { Cell } from '../../models/cell';
+import { state } from '../../state/stateManager';
 
 export const handleKeyDown = (
   e: React.KeyboardEvent<HTMLInputElement>,
@@ -9,25 +9,25 @@ export const handleKeyDown = (
   grid: Cell[],
   setSelectedCells: React.Dispatch<
     React.SetStateAction<{ row: number; col: number }[]>
-  >
+  >,
 ): { row: number; col: number } | null => {
-  if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(e.key)) {
+  if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
     e.preventDefault();
 
     let newRow = row;
     let newCol = col;
 
     switch (e.key) {
-      case "ArrowUp":
+      case 'ArrowUp':
         if (row > 0) newRow--;
         break;
-      case "ArrowDown":
+      case 'ArrowDown':
         if (row < numRows - 1) newRow++;
         break;
-      case "ArrowLeft":
+      case 'ArrowLeft':
         if (col > 0) newCol--;
         break;
-      case "ArrowRight":
+      case 'ArrowRight':
         if (col < grid.filter((cell) => cell.row === row).length - 1) newCol++;
         break;
       default:
@@ -49,7 +49,7 @@ export const handleMouseDown = (
   setSelectedCells: React.Dispatch<
     React.SetStateAction<{ row: number; col: number }[]>
   >,
-  setIsSelecting: React.Dispatch<React.SetStateAction<boolean>>
+  setIsSelecting: React.Dispatch<React.SetStateAction<boolean>>,
 ) => {
   setIsSelecting(true);
   setSelectedCells([{ row, col }]);
@@ -63,7 +63,7 @@ export const handleMouseEnter = (
   selectedCells: { row: number; col: number }[],
   setSelectedCells: React.Dispatch<
     React.SetStateAction<{ row: number; col: number }[]>
-  >
+  >,
 ) => {
   if (isSelecting) {
     const startCell = selectedCells[0];

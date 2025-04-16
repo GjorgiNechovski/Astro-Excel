@@ -1,16 +1,16 @@
-import { useState, useEffect } from "react";
-import { Cell } from "../../models/cell";
-import { state } from "../../state/stateManager";
+import { useState, useEffect } from 'react';
+import { Cell } from '../../models/cell';
+import { state } from '../../state/stateManager';
 
 export const useGridState = (initialCells: Cell[]) => {
   const [grid, setGrid] = useState<Cell[]>(initialCells);
 
   const [numRows, setNumRows] = useState<number>(
-    Math.max(...initialCells.map((cell) => cell.row)) + 1
+    Math.max(...initialCells.map((cell) => cell.row)) + 1,
   );
 
   const [numCols, setNumCols] = useState<number>(
-    Math.max(...initialCells.map((cell) => cell.col)) + 1
+    Math.max(...initialCells.map((cell) => cell.col)) + 1,
   );
 
   useEffect(() => {
@@ -32,7 +32,7 @@ export const useGridState = (initialCells: Cell[]) => {
 
     return () => {
       state.listeners = state.listeners.filter(
-        (listener) => listener !== updateGrid
+        (listener) => listener !== updateGrid,
       );
     };
   }, [initialCells, grid]);

@@ -13,13 +13,13 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref } from "vue";
-import { state } from "../../state/stateManager";
-import { Cell, type ICellStyle } from "../../models/cell";
-import { cellHeight, cellWidth } from "../../models/contants";
+import { defineComponent, ref } from 'vue';
+import { state } from '../../state/stateManager';
+import { Cell, type ICellStyle } from '../../models/cell';
+import { cellHeight, cellWidth } from '../../models/contants';
 
 export default defineComponent({
-  name: "CSVControls",
+  name: 'CSVControls',
   setup() {
     const fileInput = ref<HTMLInputElement | null>(null);
 
@@ -39,8 +39,8 @@ export default defineComponent({
           const cell = grid.find((c) => c.row === row && c.col === col);
           const value =
             cell?.disabled && row !== 0 && col !== 0
-              ? ""
-              : cell?.displayValue || "";
+              ? ''
+              : cell?.displayValue || '';
           rowData.push(value);
         }
         csvArray.push(rowData);
@@ -48,15 +48,15 @@ export default defineComponent({
 
       const csvContent = csvArray
         .map((row) =>
-          row.map((value) => `"${value.replace(/"/g, '""')}"`).join(",")
+          row.map((value) => `"${value.replace(/"/g, '""')}"`).join(','),
         )
-        .join("\n");
+        .join('\n');
 
-      const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-      const link = document.createElement("a");
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
       const url = URL.createObjectURL(blob);
-      link.setAttribute("href", url);
-      link.setAttribute("download", "spreadsheet.csv");
+      link.setAttribute('href', url);
+      link.setAttribute('download', 'spreadsheet.csv');
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -69,16 +69,16 @@ export default defineComponent({
 
       const file = input.files[0];
       const reader = new FileReader();
-      const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+      const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 
       reader.onload = (e) => {
         const text = e.target?.result as string;
         const rows = text
-          .split("\n")
+          .split('\n')
           .map((row) =>
             row
-              .split(",")
-              .map((value) => value.replace(/^"|"$/g, "").replace(/""/g, '"'))
+              .split(',')
+              .map((value) => value.replace(/^"|"$/g, '').replace(/""/g, '"')),
           );
 
         const newGrid: Cell[] = [];
@@ -88,10 +88,10 @@ export default defineComponent({
             const cellStyle: ICellStyle = {
               width: `${cellWidth}px`,
               height: `${cellHeight}px`,
-              border: "1px solid black",
-              padding: "0",
-              textAlign: isHeader ? "center" : "start",
-              backgroundColor: isHeader ? "#ff9563" : "white",
+              border: '1px solid black',
+              padding: '0',
+              textAlign: isHeader ? 'center' : 'start',
+              backgroundColor: isHeader ? '#ff9563' : 'white',
             };
 
             const newCell = new Cell(
@@ -101,12 +101,12 @@ export default defineComponent({
               colIndex,
               isHeader,
               undefined,
-              cellStyle
+              cellStyle,
             );
 
             if (rowIndex === 0 && colIndex > 0) {
-              newCell.realValue = alphabet[colIndex - 1] || "";
-              newCell.displayValue = alphabet[colIndex - 1] || "";
+              newCell.realValue = alphabet[colIndex - 1] || '';
+              newCell.displayValue = alphabet[colIndex - 1] || '';
             } else if (colIndex === 0 && rowIndex > 0) {
               newCell.realValue = rowIndex.toString();
               newCell.displayValue = rowIndex.toString();
@@ -117,7 +117,7 @@ export default defineComponent({
         });
 
         state.setGrid(newGrid);
-        input.value = "";
+        input.value = '';
       };
 
       reader.readAsText(file);

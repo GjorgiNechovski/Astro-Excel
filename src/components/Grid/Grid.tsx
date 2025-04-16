@@ -1,12 +1,12 @@
-import { useEffect, useState } from "react";
-import { Cell } from "../../models/cell";
-import { state } from "../../state/stateManager";
-import { evaluateFormula } from "../../util/functions/math";
-import ContextMenu from "../ContextMenu/ContextMenu";
-import { useCellSelection } from "../../util/hooks/useCellSelection";
-import { useGridResize } from "../../util/hooks/useGridResize";
-import { useGridScroll } from "../../util/hooks/useGridScroll";
-import { useGridState } from "../../util/hooks/useGridState";
+import { useEffect, useState } from 'react';
+import { Cell } from '../../models/cell';
+import { state } from '../../state/stateManager';
+import { evaluateFormula } from '../../util/functions/math';
+import ContextMenu from '../ContextMenu/ContextMenu';
+import { useCellSelection } from '../../util/hooks/useCellSelection';
+import { useGridResize } from '../../util/hooks/useGridResize';
+import { useGridScroll } from '../../util/hooks/useGridScroll';
+import { useGridState } from '../../util/hooks/useGridState';
 
 interface GridProps {
   cells: Cell[];
@@ -14,7 +14,7 @@ interface GridProps {
 
 export default function Grid({ cells: initialCells }: GridProps) {
   const getColumnLabel = (col: number): string => {
-    let label = "";
+    let label = '';
     let tempCol = col - 1;
     do {
       label = String.fromCharCode(65 + (tempCol % 26)) + label;
@@ -49,7 +49,7 @@ export default function Grid({ cells: initialCells }: GridProps) {
     },
     setNumRows,
     setNumCols,
-    getColumnLabel
+    getColumnLabel,
   );
 
   const [contextMenu, setContextMenu] = useState<{
@@ -59,13 +59,13 @@ export default function Grid({ cells: initialCells }: GridProps) {
 
   useEffect(() => {
     const handleClick = () => setContextMenu(null);
-    document.addEventListener("click", handleClick);
-    return () => document.removeEventListener("click", handleClick);
+    document.addEventListener('click', handleClick);
+    return () => document.removeEventListener('click', handleClick);
   }, []);
 
   useEffect(() => {
     const updatedGrid = grid.map((cell) => {
-      if (cell.displayValue.endsWith("=")) {
+      if (cell.displayValue.endsWith('=')) {
         const formula = cell.displayValue.slice(0, -1);
         const evaluatingCells = new Set<string>();
         const cellKey = `${cell.row}-${cell.col}`;
@@ -85,18 +85,18 @@ export default function Grid({ cells: initialCells }: GridProps) {
   const handleInputChange = (row: number, col: number, value: string) => {
     let updatedGrid;
 
-    if (value.endsWith("=")) {
+    if (value.endsWith('=')) {
       const formula = value.slice(0, -1);
       updatedGrid = grid.map((cell) =>
         cell.row === row && cell.col === col
           ? { ...cell, displayValue: `${formula}=`, realValue: value }
-          : cell
+          : cell,
       );
     } else {
       updatedGrid = grid.map((cell) =>
         cell.row === row && cell.col === col
           ? { ...cell, displayValue: value, realValue: value }
-          : cell
+          : cell,
       );
     }
 
@@ -117,37 +117,37 @@ export default function Grid({ cells: initialCells }: GridProps) {
     for (let i = 0; i < numRows; i++) {
       const rowCells = grid.filter((cell) => cell.row === i);
       rowsArray.push(
-        <div key={i} style={{ display: "flex", position: "relative" }}>
+        <div key={i} style={{ display: 'flex', position: 'relative' }}>
           {rowCells.map((cell, index) => {
             const inputKey = `${cell.row}-${cell.col}`;
             let displayText = cell.realValue;
             if (
               cell.roundNumbers !== undefined &&
-              cell.realValue !== "" &&
+              cell.realValue !== '' &&
               !isNaN(Number(cell.realValue))
             ) {
               displayText = Number(cell.realValue).toFixed(cell.roundNumbers);
             }
 
             return (
-              <div key={index} style={{ position: "relative" }}>
+              <div key={index} style={{ position: 'relative' }}>
                 <input
                   value={displayText}
                   style={{
-                    width: cell.styles?.width || "100px",
-                    height: cell.styles?.height || "30px",
-                    border: cell.styles?.border || "1px solid #ccc",
-                    padding: cell.styles?.padding || "2px",
-                    textAlign: cell.styles?.textAlign || "left",
+                    width: cell.styles?.width || '100px',
+                    height: cell.styles?.height || '30px',
+                    border: cell.styles?.border || '1px solid #ccc',
+                    padding: cell.styles?.padding || '2px',
+                    textAlign: cell.styles?.textAlign || 'left',
                     backgroundColor: isCellSelected(cell.row, cell.col)
-                      ? "lightblue"
-                      : cell.styles?.backgroundColor || "white",
-                    color: cell.styles?.color || "black",
-                    fontSize: cell.styles?.fontSize || "18px",
-                    fontFamily: cell.styles?.fontFamily || "Arial, sans-serif",
-                    fontWeight: cell.styles?.fontWeight || "normal",
-                    fontStyle: cell.styles?.fontStyle || "normal",
-                    textDecoration: cell.styles?.textDecoration || "none",
+                      ? 'lightblue'
+                      : cell.styles?.backgroundColor || 'white',
+                    color: cell.styles?.color || 'black',
+                    fontSize: cell.styles?.fontSize || '18px',
+                    fontFamily: cell.styles?.fontFamily || 'Arial, sans-serif',
+                    fontWeight: cell.styles?.fontWeight || 'normal',
+                    fontStyle: cell.styles?.fontStyle || 'normal',
+                    textDecoration: cell.styles?.textDecoration || 'none',
                   }}
                   disabled={cell.disabled}
                   onChange={(e) =>
@@ -162,7 +162,7 @@ export default function Grid({ cells: initialCells }: GridProps) {
                         for (let i = newRowStart; i < newRowEnd; i++) {
                           for (let j = 0; j < numCols; j++) {
                             const isHeader = j === 0;
-                            const value = isHeader ? i.toString() : "";
+                            const value = isHeader ? i.toString() : '';
                             newCells.push({
                               row: i,
                               col: j,
@@ -183,7 +183,7 @@ export default function Grid({ cells: initialCells }: GridProps) {
                         for (let j = newColStart; j < newColEnd; j++) {
                           for (let i = 0; i < numRows; i++) {
                             const isHeader = i === 0;
-                            const value = isHeader ? getColumnLabel(j) : "";
+                            const value = isHeader ? getColumnLabel(j) : '';
                             newCells.push({
                               row: i,
                               col: j,
@@ -209,16 +209,16 @@ export default function Grid({ cells: initialCells }: GridProps) {
                 {index < rowCells.length - 1 && (
                   <div
                     style={{
-                      position: "absolute",
+                      position: 'absolute',
                       right: 0,
                       top: 0,
                       bottom: 0,
-                      width: "5px",
-                      cursor: "col-resize",
-                      backgroundColor: "transparent",
+                      width: '5px',
+                      cursor: 'col-resize',
+                      backgroundColor: 'transparent',
                     }}
                     onMouseDown={(e) =>
-                      handleMouseDownOnBorder("col", cell.col, e)
+                      handleMouseDownOnBorder('col', cell.col, e)
                     }
                   />
                 )}
@@ -227,17 +227,17 @@ export default function Grid({ cells: initialCells }: GridProps) {
           })}
           <div
             style={{
-              position: "absolute",
+              position: 'absolute',
               bottom: 0,
               left: 0,
               right: 0,
-              height: "5px",
-              cursor: "row-resize",
-              backgroundColor: "transparent",
+              height: '5px',
+              cursor: 'row-resize',
+              backgroundColor: 'transparent',
             }}
-            onMouseDown={(e) => handleMouseDownOnBorder("row", i, e)}
+            onMouseDown={(e) => handleMouseDownOnBorder('row', i, e)}
           />
-        </div>
+        </div>,
       );
     }
     return rowsArray;
@@ -246,9 +246,10 @@ export default function Grid({ cells: initialCells }: GridProps) {
   return (
     <div
       ref={gridRef}
-      style={{ overflow: "auto", height: "100%", width: "100%" }}
+      style={{ overflow: 'auto', height: '100%', width: '100%' }}
       onMouseUp={onMouseUp}
-      onContextMenu={handleContextMenu}>
+      onContextMenu={handleContextMenu}
+    >
       {getRows()}
       {contextMenu && (
         <ContextMenu
@@ -258,10 +259,10 @@ export default function Grid({ cells: initialCells }: GridProps) {
           onSetRoundNumbers={(decimals) => {
             const updatedGrid = grid.map((cell) =>
               selectedCells.some(
-                (sel) => sel.row === cell.row && sel.col === cell.col
+                (sel) => sel.row === cell.row && sel.col === cell.col,
               )
                 ? { ...cell, roundNumbers: decimals }
-                : cell
+                : cell,
             );
             setGrid(updatedGrid);
             state.setGrid(updatedGrid);

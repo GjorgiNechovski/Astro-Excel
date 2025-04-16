@@ -1,25 +1,25 @@
-import { useState, useEffect } from "react";
-import { Cell } from "../../models/cell";
+import { useState, useEffect } from 'react';
+import { Cell } from '../../models/cell';
 
 export const useGridResize = (
   grid: Cell[],
-  setGrid: (grid: Cell[]) => void
+  setGrid: (grid: Cell[]) => void,
 ) => {
   const [resizing, setResizing] = useState<{
-    type: "row" | "col";
+    type: 'row' | 'col';
     index: number;
     startPos: number;
   } | null>(null);
 
   const handleMouseDownOnBorder = (
-    type: "row" | "col",
+    type: 'row' | 'col',
     index: number,
-    e: React.MouseEvent
+    e: React.MouseEvent,
   ) => {
     setResizing({
       type,
       index,
-      startPos: type === "col" ? e.clientX : e.clientY,
+      startPos: type === 'col' ? e.clientX : e.clientY,
     });
   };
 
@@ -27,26 +27,26 @@ export const useGridResize = (
     if (resizing) {
       const { type, index, startPos } = resizing;
       const newSize =
-        type === "col" ? e.clientX - startPos : e.clientY - startPos;
+        type === 'col' ? e.clientX - startPos : e.clientY - startPos;
 
       const updatedGrid = grid.map((cell) => {
-        if (type === "col" && cell.col === index) {
+        if (type === 'col' && cell.col === index) {
           return {
             ...cell,
             styles: {
               ...cell.styles,
               width: `${
-                parseInt(cell.styles?.width || "100px", 10) + newSize
+                parseInt(cell.styles?.width || '100px', 10) + newSize
               }px`,
             },
           };
-        } else if (type === "row" && cell.row === index) {
+        } else if (type === 'row' && cell.row === index) {
           return {
             ...cell,
             styles: {
               ...cell.styles,
               height: `${
-                parseInt(cell.styles?.height || "30px", 10) + newSize
+                parseInt(cell.styles?.height || '30px', 10) + newSize
               }px`,
             },
           };
@@ -59,7 +59,7 @@ export const useGridResize = (
       setResizing({
         type,
         index,
-        startPos: type === "col" ? e.clientX : e.clientY,
+        startPos: type === 'col' ? e.clientX : e.clientY,
       });
     }
   };
@@ -70,16 +70,16 @@ export const useGridResize = (
 
   useEffect(() => {
     if (resizing) {
-      window.addEventListener("mousemove", handleResize);
-      window.addEventListener("mouseup", handleMouseUp);
+      window.addEventListener('mousemove', handleResize);
+      window.addEventListener('mouseup', handleMouseUp);
     } else {
-      window.removeEventListener("mousemove", handleResize);
-      window.removeEventListener("mouseup", handleMouseUp);
+      window.removeEventListener('mousemove', handleResize);
+      window.removeEventListener('mouseup', handleMouseUp);
     }
 
     return () => {
-      window.removeEventListener("mousemove", handleResize);
-      window.removeEventListener("mouseup", handleMouseUp);
+      window.removeEventListener('mousemove', handleResize);
+      window.removeEventListener('mouseup', handleMouseUp);
     };
   }, [resizing]);
 
