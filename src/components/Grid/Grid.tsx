@@ -1,50 +1,18 @@
-import { useEffect, useState, useRef } from "react";
-import {
-  handleKeyDown,
-  handleMouseDown,
-  handleMouseEnter,
-} from "../../util/functions/keyboard";
+import { useEffect, useState } from "react";
 import { Cell } from "../../models/cell";
 import { state } from "../../state/stateManager";
 import { evaluateFormula } from "../../util/functions/math";
 import ContextMenu from "../ContextMenu/ContextMenu";
-import { createCell } from "../../util/functions/cell-helper";
+import { useCellSelection } from "../../util/hooks/useCellSelection";
+import { useGridResize } from "../../util/hooks/useGridResize";
+import { useGridScroll } from "../../util/hooks/useGridScroll";
+import { useGridState } from "../../util/hooks/useGridState";
 
 interface GridProps {
   cells: Cell[];
 }
 
 export default function Grid({ cells: initialCells }: GridProps) {
-  const [grid, setGrid] = useState<Cell[]>(initialCells);
-  const [numRows, setNumRows] = useState<number>(
-    Math.max(...initialCells.map((cell) => cell.row)) + 1
-  );
-  const [numCols, setNumCols] = useState<number>(
-    Math.max(...initialCells.map((cell) => cell.col)) + 1
-  );
-  const [selectedCells, setSelectedCells] = useState<
-    { row: number; col: number }[]
-  >([]);
-  const [isSelecting, setIsSelecting] = useState<boolean>(false);
-  const [resizing, setResizing] = useState<{
-    type: "row" | "col";
-    index: number;
-    startPos: number;
-  } | null>(null);
-  const [contextMenu, setContextMenu] = useState<{
-    x: number;
-    y: number;
-  } | null>(null);
-
-  const gridRef = useRef<HTMLDivElement>(null);
-  const inputRefs = useRef<{ [key: string]: HTMLInputElement | null }>({});
-
-  useEffect(() => {
-    const handleClick = () => setContextMenu(null);
-    document.addEventListener("click", handleClick);
-    return () => document.removeEventListener("click", handleClick);
-  }, []);
-
   const getColumnLabel = (col: number): string => {
     let label = "";
     let tempCol = col - 1;
@@ -55,96 +23,45 @@ export default function Grid({ cells: initialCells }: GridProps) {
     return label;
   };
 
-  const expandGrid = (direction: "row" | "col") => {
-    const newCells: Cell[] = [];
-    if (direction === "row") {
-      const newRowStart = numRows;
-      const newRowEnd = newRowStart + 10;
-      for (let i = newRowStart; i < newRowEnd; i++) {
-        for (let j = 0; j < numCols; j++) {
-          const isHeader = j === 0;
-          const value = isHeader ? i.toString() : "";
-          newCells.push(createCell(value, value, i, j, isHeader));
-        }
-      }
-      setNumRows(newRowEnd);
-    } else if (direction === "col") {
-      const newColStart = numCols;
-      const newColEnd = newColStart + 10;
-      for (let j = newColStart; j < newColEnd; j++) {
-        for (let i = 0; i < numRows; i++) {
-          const isHeader = i === 0;
-          const value = isHeader ? getColumnLabel(j) : "";
-          newCells.push(createCell(value, value, i, j, isHeader));
-        }
-      }
-      setNumCols(newColEnd);
-    }
+  const { grid, numRows, numCols, setGrid, setNumRows, setNumCols } =
+    useGridState(initialCells);
+  const {
+    selectedCells,
+    inputRefs,
+    isCellSelected,
+    onMouseDown,
+    onMouseEnter,
+    onMouseUp,
+    onKeyDown,
+    setSelectedCells,
+  } = useCellSelection(grid, numRows);
+  const { handleMouseDownOnBorder } = useGridResize(grid, (newGrid) => {
+    setGrid(newGrid);
+    state.setGrid(newGrid);
+  });
+  const { gridRef } = useGridScroll(
+    numRows,
+    numCols,
+    grid,
+    (newGrid) => {
+      setGrid(newGrid);
+      state.setGrid(newGrid);
+    },
+    setNumRows,
+    setNumCols,
+    getColumnLabel
+  );
 
-    if (newCells.length > 0) {
-      const updatedGrid = [...grid, ...newCells];
-      setGrid(updatedGrid);
-      state.setGrid(updatedGrid);
-    }
-  };
-
-  const handleScroll = () => {
-    const gridElement = gridRef.current;
-    if (!gridElement) return;
-
-    const {
-      scrollTop,
-      scrollHeight,
-      clientHeight,
-      scrollLeft,
-      scrollWidth,
-      clientWidth,
-    } = gridElement;
-
-    if (scrollHeight - scrollTop - clientHeight < 10) {
-      expandGrid("row");
-    }
-
-    if (scrollWidth - scrollLeft - clientWidth < 10) {
-      expandGrid("col");
-    }
-  };
+  const [contextMenu, setContextMenu] = useState<{
+    x: number;
+    y: number;
+  } | null>(null);
 
   useEffect(() => {
-    const gridElement = gridRef.current;
-    if (gridElement) {
-      gridElement.addEventListener("scroll", handleScroll);
-    }
-    return () => {
-      if (gridElement) {
-        gridElement.removeEventListener("scroll", handleScroll);
-      }
-    };
-  }, [numRows, numCols]);
-
-  useEffect(() => {
-    const updateGrid = () => {
-      if (JSON.stringify(state.grid) !== JSON.stringify(grid)) {
-        setGrid([...state.grid]);
-        const rows = Math.max(...state.grid.map((cell) => cell.row)) + 1;
-        const cols = Math.max(...state.grid.map((cell) => cell.col)) + 1;
-        setNumRows(rows);
-        setNumCols(cols);
-      }
-    };
-
-    state.subscribe(updateGrid);
-
-    if (state.grid.length === 0) {
-      state.setGrid(initialCells);
-    }
-
-    return () => {
-      state.listeners = state.listeners.filter(
-        (listener) => listener !== updateGrid
-      );
-    };
-  }, [initialCells, grid]);
+    const handleClick = () => setContextMenu(null);
+    document.addEventListener("click", handleClick);
+    return () => document.removeEventListener("click", handleClick);
+  }, []);
 
   useEffect(() => {
     const updatedGrid = grid.map((cell) => {
@@ -163,7 +80,7 @@ export default function Grid({ cells: initialCells }: GridProps) {
       setGrid(updatedGrid);
       state.setGrid(updatedGrid);
     }
-  }, [grid]);
+  }, [grid, setGrid]);
 
   const handleInputChange = (row: number, col: number, value: string) => {
     let updatedGrid;
@@ -185,97 +102,8 @@ export default function Grid({ cells: initialCells }: GridProps) {
 
     setGrid(updatedGrid);
     state.setGrid(updatedGrid);
-    state.setSelectedCells([{ row, col }]);
+    setSelectedCells([{ row, col }]);
   };
-
-  const isCellSelected = (row: number, col: number) => {
-    return selectedCells.some((cell) => cell.row === row && cell.col === col);
-  };
-
-  useEffect(() => {
-    if (selectedCells.length > 0) {
-      const { row, col } = selectedCells[0];
-      const inputKey = `${row}-${col}`;
-      const inputElement = inputRefs.current[inputKey];
-      if (inputElement) {
-        inputElement.focus();
-      }
-    }
-  }, [selectedCells]);
-
-  const handleMouseDownOnBorder = (
-    type: "row" | "col",
-    index: number,
-    e: React.MouseEvent
-  ) => {
-    setResizing({
-      type,
-      index,
-      startPos: type === "col" ? e.clientX : e.clientY,
-    });
-  };
-
-  const handleResize = (e: MouseEvent) => {
-    if (resizing) {
-      const { type, index, startPos } = resizing;
-      const newSize =
-        type === "col" ? e.clientX - startPos : e.clientY - startPos;
-
-      const updatedGrid = grid.map((cell) => {
-        if (type === "col" && cell.col === index) {
-          return {
-            ...cell,
-            styles: {
-              ...cell.styles,
-              width: `${
-                parseInt(cell.styles?.width || "100px", 10) + newSize
-              }px`,
-            },
-          };
-        } else if (type === "row" && cell.row === index) {
-          return {
-            ...cell,
-            styles: {
-              ...cell.styles,
-              height: `${
-                parseInt(cell.styles?.height || "30px", 10) + newSize
-              }px`,
-            },
-          };
-        }
-        return cell;
-      });
-
-      //@ts-ignore
-      setGrid(updatedGrid);
-      //@ts-ignore
-      state.setGrid(updatedGrid);
-      setResizing({
-        type,
-        index,
-        startPos: type === "col" ? e.clientX : e.clientY,
-      });
-    }
-  };
-
-  const handleMouseUp = () => {
-    setResizing(null);
-  };
-
-  useEffect(() => {
-    if (resizing) {
-      window.addEventListener("mousemove", handleResize);
-      window.addEventListener("mouseup", handleMouseUp);
-    } else {
-      window.removeEventListener("mousemove", handleResize);
-      window.removeEventListener("mouseup", handleMouseUp);
-    }
-
-    return () => {
-      window.removeEventListener("mousemove", handleResize);
-      window.removeEventListener("mouseup", handleMouseUp);
-    };
-  }, [resizing]);
 
   const handleContextMenu = (e: React.MouseEvent<HTMLDivElement>) => {
     e.preventDefault();
@@ -325,45 +153,55 @@ export default function Grid({ cells: initialCells }: GridProps) {
                   onChange={(e) =>
                     handleInputChange(cell.row, cell.col, e.target.value)
                   }
-                  onKeyDown={(e) => {
-                    const newCell = handleKeyDown(
-                      e,
-                      cell.row,
-                      cell.col,
-                      numRows,
-                      grid,
-                      setSelectedCells
-                    );
-                    if (newCell) {
-                      if (newCell.row >= numRows - 1) expandGrid("row");
-                      if (newCell.col >= numCols - 1) expandGrid("col");
-                      const newInputKey = `${newCell.row}-${newCell.col}`;
-                      const newInputElement = inputRefs.current[newInputKey];
-                      if (newInputElement) {
-                        newInputElement.focus();
+                  onKeyDown={(e) =>
+                    onKeyDown(e, cell.row, cell.col, (newCell) => {
+                      if (newCell.row >= numRows - 1) {
+                        const newCells: Cell[] = [];
+                        const newRowStart = numRows;
+                        const newRowEnd = newRowStart + 10;
+                        for (let i = newRowStart; i < newRowEnd; i++) {
+                          for (let j = 0; j < numCols; j++) {
+                            const isHeader = j === 0;
+                            const value = isHeader ? i.toString() : "";
+                            newCells.push({
+                              row: i,
+                              col: j,
+                              displayValue: value,
+                              realValue: value,
+                              disabled: isHeader,
+                            });
+                          }
+                        }
+                        setNumRows(newRowEnd);
+                        setGrid([...grid, ...newCells]);
+                        state.setGrid([...grid, ...newCells]);
                       }
-                    }
-                  }}
-                  onMouseDown={(e) => {
-                    if (e.button === 0) {
-                      handleMouseDown(
-                        cell.row,
-                        cell.col,
-                        setSelectedCells,
-                        setIsSelecting
-                      );
-                    }
-                  }}
-                  onMouseEnter={() =>
-                    handleMouseEnter(
-                      cell.row,
-                      cell.col,
-                      isSelecting,
-                      selectedCells,
-                      setSelectedCells
-                    )
+                      if (newCell.col >= numCols - 1) {
+                        const newCells: Cell[] = [];
+                        const newColStart = numCols;
+                        const newColEnd = newColStart + 10;
+                        for (let j = newColStart; j < newColEnd; j++) {
+                          for (let i = 0; i < numRows; i++) {
+                            const isHeader = i === 0;
+                            const value = isHeader ? getColumnLabel(j) : "";
+                            newCells.push({
+                              row: i,
+                              col: j,
+                              displayValue: value,
+                              realValue: value,
+                              disabled: isHeader,
+                            });
+                          }
+                        }
+                        setNumCols(newColEnd);
+                        setGrid([...grid, ...newCells]);
+                        state.setGrid([...grid, ...newCells]);
+                      }
+                    })
                   }
-                  onMouseUp={() => setIsSelecting(false)}
+                  onMouseDown={(e) => onMouseDown(cell.row, cell.col, e)}
+                  onMouseEnter={() => onMouseEnter(cell.row, cell.col)}
+                  onMouseUp={onMouseUp}
                   ref={(el) => {
                     inputRefs.current[inputKey] = el;
                   }}
@@ -409,9 +247,8 @@ export default function Grid({ cells: initialCells }: GridProps) {
     <div
       ref={gridRef}
       style={{ overflow: "auto", height: "100%", width: "100%" }}
-      onMouseUp={() => setIsSelecting(false)}
-      onContextMenu={handleContextMenu}
-    >
+      onMouseUp={onMouseUp}
+      onContextMenu={handleContextMenu}>
       {getRows()}
       {contextMenu && (
         <ContextMenu
