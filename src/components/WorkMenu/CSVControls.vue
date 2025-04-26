@@ -17,6 +17,7 @@ import { defineComponent, ref } from 'vue';
 import { state } from '../../state/stateManager';
 import { Cell, type ICellStyle } from '../../models/cell';
 import { cellHeight, cellWidth } from '../../models/contants';
+import '../../styles/csv.css';
 
 export default defineComponent({
   name: 'CSVControls',
@@ -138,19 +139,5 @@ export default defineComponent({
   display: flex;
   gap: 10px;
   margin-left: auto;
-}
-
-.csv-button {
-  padding: 8px 16px;
-  background-color: #4caf50;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 14px;
-}
-
-.csv-button:hover {
-  background-color: #45a049;
 }
 </style>

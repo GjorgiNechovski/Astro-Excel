@@ -1,6 +1,7 @@
 import React from 'react';
 import { state } from '../../state/stateManager';
 import type { ICellStyle, TextAlign } from '../../models/cell';
+import '../../styles/color-picker.css';
 
 const ColorPickers: React.FC = () => {
   const updateStyles = (property: keyof ICellStyle, value: string) => {

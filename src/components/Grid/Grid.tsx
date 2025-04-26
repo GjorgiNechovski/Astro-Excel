@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { Cell } from '../../models/cell';
 import { state } from '../../state/stateManager';
 import { evaluateFormula } from '../../util/functions/math';
@@ -56,6 +56,11 @@ export default function Grid({ cells: initialCells }: GridProps) {
     x: number;
     y: number;
   } | null>(null);
+  const [editingCell, setEditingCell] = useState<{
+    row: number;
+    col: number;
+    value: string;
+  } | null>(null);
 
   useEffect(() => {
     const handleClick = () => setContextMenu(null);
@@ -82,9 +87,22 @@ export default function Grid({ cells: initialCells }: GridProps) {
     }
   }, [grid, setGrid]);
 
-  const handleInputChange = (row: number, col: number, value: string) => {
-    let updatedGrid;
+  useEffect(() => {
+    if (editingCell) {
+      const inputKey = `${editingCell.row}-${editingCell.col}`;
+      const inputElement = inputRefs.current[inputKey];
+      if (inputElement) {
+        inputElement.focus();
+        inputElement.selectionStart = inputElement.selectionEnd =
+          editingCell.value.length;
+      }
+    }
+  }, [grid, editingCell, inputRefs]);
 
+  const handleInputChange = (row: number, col: number, value: string) => {
+    setEditingCell({ row, col, value });
+
+    let updatedGrid;
     if (value.endsWith('=')) {
       const formula = value.slice(0, -1);
       updatedGrid = grid.map((cell) =>
@@ -103,6 +121,12 @@ export default function Grid({ cells: initialCells }: GridProps) {
     setGrid(updatedGrid);
     state.setGrid(updatedGrid);
     setSelectedCells([{ row, col }]);
+  };
+
+  const handleInputBlur = (row: number, col: number) => {
+    if (editingCell && editingCell.row === row && editingCell.col === col) {
+      setEditingCell(null);
+    }
   };
 
   const handleContextMenu = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -127,6 +151,13 @@ export default function Grid({ cells: initialCells }: GridProps) {
               !isNaN(Number(cell.realValue))
             ) {
               displayText = Number(cell.realValue).toFixed(cell.roundNumbers);
+            }
+            if (
+              editingCell &&
+              editingCell.row === cell.row &&
+              editingCell.col === cell.col
+            ) {
+              displayText = editingCell.value;
             }
 
             return (
@@ -153,6 +184,7 @@ export default function Grid({ cells: initialCells }: GridProps) {
                   onChange={(e) =>
                     handleInputChange(cell.row, cell.col, e.target.value)
                   }
+                  onBlur={() => handleInputBlur(cell.row, cell.col)}
                   onKeyDown={(e) =>
                     onKeyDown(e, cell.row, cell.col, (newCell) => {
                       if (newCell.row >= numRows - 1) {

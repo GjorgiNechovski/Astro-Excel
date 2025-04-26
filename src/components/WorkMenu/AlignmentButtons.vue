@@ -10,6 +10,7 @@
 import { defineComponent } from 'vue';
 import { state } from '../../state/stateManager';
 import { Cell, type TextAlign, type ICellStyle } from '../../models/cell';
+import '../../styles/alignment-buttons.css';
 
 export default defineComponent({
   name: 'AlignmentButtons',
@@ -55,24 +56,3 @@ export default defineComponent({
   },
 });
 </script>
-
-<style scoped>
-.alignment-buttons {
-  display: flex;
-  gap: 10px;
-  margin-bottom: 10px;
-}
-
-button {
-  padding: 5px 10px;
-  font-size: 14px;
-  cursor: pointer;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  background-color: #f9f9f9;
-}
-
-button:hover {
-  background-color: #e0e0e0;
-}
-</style>

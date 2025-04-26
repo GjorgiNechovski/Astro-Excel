@@ -1,17 +1,48 @@
 import React from 'react';
 import { state } from '../../state/stateManager';
-import type { ICellStyle, TextAlign } from '../../models/cell';
+import type { ICellStyle } from '../../models/cell';
 import { fontSizes } from '../../models/contants';
+import '../../styles/font-settings.css';
 
 const FontSettings: React.FC = () => {
-  const updateStyles = (
+  const toggleStyleProperty = (
     property: keyof ICellStyle,
-    value: string | boolean | TextAlign,
+    value: string,
+    defaultValue: string,
   ) => {
-    if (state.selectedCells.length > 0) {
-      const updatedGrid = [...state.grid];
+    if (state.selectedCells.length === 0) return;
 
-      updatedGrid.forEach((cell) => {
+    const selectedCells = state.grid.filter((cell) =>
+      state.selectedCells.some(
+        (selected) => selected.row === cell.row && selected.col === cell.col,
+      ),
+    );
+
+    const allHaveStyle = selectedCells.every(
+      (cell) => cell.styles?.[property] === value,
+    );
+
+    const updatedGrid = [...state.grid].map((cell) => {
+      if (
+        state.selectedCells.some(
+          (selected) => selected.row === cell.row && selected.col === cell.col,
+        )
+      ) {
+        if (!cell.styles) {
+          cell.styles = {} as ICellStyle;
+        }
+        //@ts-ignore
+        cell.styles[property] = allHaveStyle ? defaultValue : value;
+      }
+      return cell;
+    });
+
+    state.setGrid(updatedGrid);
+  };
+
+  const handleFontSizeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    if (state.selectedCells.length > 0) {
+      const updatedGrid = [...state.grid].map((cell) => {
         if (
           state.selectedCells.some(
             (selected) =>
@@ -21,41 +52,48 @@ const FontSettings: React.FC = () => {
           if (!cell.styles) {
             cell.styles = {} as ICellStyle;
           }
-
-          if (property === 'textAlign') {
-            cell.styles[property] = value as TextAlign;
-          } else {
-            cell.styles[property] = value as string;
-          }
+          cell.styles.fontSize = e.target.value + 'px';
         }
+        return cell;
       });
-
       state.setGrid(updatedGrid);
     }
   };
 
-  const handleFontSizeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    updateStyles('fontSize', e.target.value + 'px');
-  };
-
   const handleFontFamilyChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    updateStyles('fontFamily', e.target.value);
+    if (state.selectedCells.length > 0) {
+      const updatedGrid = [...state.grid].map((cell) => {
+        if (
+          state.selectedCells.some(
+            (selected) =>
+              selected.row === cell.row && selected.col === cell.col,
+          )
+        ) {
+          if (!cell.styles) {
+            cell.styles = {} as ICellStyle;
+          }
+          cell.styles.fontFamily = e.target.value;
+        }
+        return cell;
+      });
+      state.setGrid(updatedGrid);
+    }
   };
 
   const handleBoldClick = () => {
-    updateStyles('fontWeight', 'bold');
+    toggleStyleProperty('fontWeight', 'bold', 'normal');
   };
 
   const handleItalicClick = () => {
-    updateStyles('fontStyle', 'italic');
+    toggleStyleProperty('fontStyle', 'italic', 'normal');
   };
 
   const handleUnderlineClick = () => {
-    updateStyles('textDecoration', 'underline');
+    toggleStyleProperty('textDecoration', 'underline', 'none');
   };
 
   return (
-    <div>
+    <div className='font-settings'>
       <span>
         <label>Font Size:</label>
         <select onChange={handleFontSizeChange}>

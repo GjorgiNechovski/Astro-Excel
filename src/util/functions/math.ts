@@ -176,44 +176,6 @@ export const evaluateFormula = (
           : numbers[mid];
       break;
 
-    case 'if':
-      const conditionMatch = formula.match(/IF\(([^,]+),([^,]+),(.+)\)/);
-      if (!conditionMatch) {
-        result = 'Invalid IF syntax';
-        break;
-      }
-      const [_, condition, valueIfTrue, valueIfFalse] = conditionMatch;
-      const [ref, operator, threshold] = condition.split(/([><=]+)/);
-      const { row, col } = cellReferenceToIndices(ref.trim());
-      const cellKey = `${row}-${col}`;
-      if (evaluatingCells.has(cellKey)) {
-        result = 'Circular reference detected';
-        break;
-      }
-      evaluatingCells.add(cellKey);
-      const cell = grid.find((c) => c.row === row && c.col === col);
-      const cellValue = cell ? Number(cell.realValue) : 0;
-      const threshNum = Number(threshold.trim());
-
-      let isTrue: boolean;
-      switch (operator) {
-        case '>':
-          isTrue = cellValue > threshNum;
-          break;
-        case '<':
-          isTrue = cellValue < threshNum;
-          break;
-        case '=':
-          isTrue = cellValue === threshNum;
-          break;
-        default:
-          result = 'Invalid operator';
-          return result;
-      }
-      result = isTrue ? valueIfTrue.trim() : valueIfFalse.trim();
-      evaluatingCells.delete(cellKey);
-      break;
-
     case 'concat':
       result = '';
       for (let i = minRow; i <= maxRow; i++) {
@@ -224,35 +186,6 @@ export const evaluateFormula = (
           }
         }
       }
-      break;
-
-    case 'power':
-      const powerArgs = formula.match(/POWER\(([^,]+),([^)]+)\)/);
-      if (!powerArgs || powerArgs.length < 3) {
-        result = 'Invalid POWER syntax';
-        break;
-      }
-      const baseRef = cellReferenceToIndices(powerArgs[1].trim());
-      const expRef = cellReferenceToIndices(powerArgs[2].trim());
-      const baseKey = `${baseRef.row}-${baseRef.col}`;
-      const expKey = `${expRef.row}-${expRef.col}`;
-      if (evaluatingCells.has(baseKey) || evaluatingCells.has(expKey)) {
-        result = 'Circular reference detected';
-        break;
-      }
-      evaluatingCells.add(baseKey);
-      evaluatingCells.add(expKey);
-      const baseCell = grid.find(
-        (c) => c.row === baseRef.row && c.col === baseRef.col,
-      );
-      const expCell = grid.find(
-        (c) => c.row === expRef.row && c.col === expRef.col,
-      );
-      const base = baseCell ? Number(baseCell.realValue) : 0;
-      const exponent = expCell ? Number(expCell.realValue) : 0;
-      result = Math.pow(base, exponent);
-      evaluatingCells.delete(baseKey);
-      evaluatingCells.delete(expKey);
       break;
 
     default:
